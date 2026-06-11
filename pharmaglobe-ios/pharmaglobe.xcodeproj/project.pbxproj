@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01532DAA137C099F0076F6BF /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 01532DA9137C099F0076F6BF /* icon.png */; };
+		1B1C4C62BB909348327ACD09 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7F6440BB52631A806646D72 /* CoreMedia.framework */; };
+		1C5A400F86DCB82688C6D976 /* libpillow.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF149D19613194CAF965F50 /* libpillow.xcframework */; };
+		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		1E834B91808AB55AFA3E19DB /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 455F4FA4B214A5B3871F3839 /* CoreVideo.framework */; };
+		22334B7C9D7ADA3E39EB8D22 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FC9402A936AA6AC8DEF0AA8 /* libbz2.tbd */; };
+		25BF4271A63D4BA6F26EA1EC /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B61B4BB0BE940370205D90CD /* ImageIO.framework */; };
+		2CB5F34717D5233A006187AB /* bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CB5F34617D5233A006187AB /* bridge.m */; };
+		2CBF44D680EEBA8AB8F6D27D /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3A242769CBE14B9CEA1451A /* Accelerate.framework */; };
+		39F24D068BAA9CBDE03C9F59 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8FB4302B8688E3C030C7B51 /* OpenGLES.framework */; };
+		3B484ADC8C21FB563F01D3B6 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B1F4E7394F79A0E6E776BAA /* AVFoundation.framework */; };
+		3D5B445C86F327AE74AB1D3D /* libSDL2_image.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31AA4ADAABABFEDA99FE6456 /* libSDL2_image.xcframework */; };
+		3E574385B78AC3DCC5EEC60D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56EB4F0AA53F6C46492E343D /* Metal.framework */; };
+		47ED49E097F4C4C208A71714 /* libpng16.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF4B4A91BD63D6A11ED512C6 /* libpng16.xcframework */; };
+		59738AB51A8BB5D8001B2C0C /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59738AB41A8BB5D8001B2C0C /* lib */; };
+		59738ABB1A8E19AA001B2C0C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59738ABA1A8E19AA001B2C0C /* Images.xcassets */; };
+		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
+		59FDEA8B21E7D34E004E6ECE /* include in Resources */ = {isa = PBXBuildFile; fileRef = 59FDEA8A21E7D34E004E6ECE /* include */; };
+		666D4FF0A2B0CECC6F4F0C3E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B12E480AA000E623DEFBBDB9 /* CoreGraphics.framework */; };
+		682041E583797E7D2B989858 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A04D4079BBB7E216B3F82D40 /* UIKit.framework */; };
+		6D1E42449505DD8CFA4EB48D /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A2846E0A3427721EE461132 /* CoreHaptics.framework */; };
+		6DD245D9AB843910DF5836DC /* libpython3.11.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05684B3EBC5395B2CA094D27 /* libpython3.11.xcframework */; };
+		746E4EE1BB3A69B3537074D8 /* libpyobjus.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 085649E6AC0023B75B5651EC /* libpyobjus.xcframework */; };
+		75D34332BE8E7CEBE5702387 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E24DC289619D2D57578427 /* MessageUI.framework */; };
+		780C4A4E9CD84A025F813701 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35634738B68A8A80A3A9388B /* MobileCoreServices.framework */; };
+		89874B40BDF1DE38E59F07ED /* libjpeg.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6B4EBDB8EA9A36BFF30756 /* libjpeg.xcframework */; };
+		8A854B73AE49BE3324B1FE1D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9404D26B6FCF5A50AB24517 /* AudioToolbox.framework */; };
+		8BFE4144B2E0CC2D40A40CC2 /* libSDL2_mixer.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 265F496289A4DA361556C844 /* libSDL2_mixer.xcframework */; };
+		98FC4C3DBBC7B6EA99127D43 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F3914B13A1F8B698D4BC7B54 /* libc++.tbd */; };
+		9E05491F8890C5083F3E5F20 /* libssl.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D624436AB9FB34F94507493 /* libssl.xcframework */; };
+		9EEF4464BD365A3664102B5C /* libSDL2.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7EF478092CEC252FC6B8299 /* libSDL2.xcframework */; };
+		9FE94E92B3AD707C1EC6DAA7 /* libcrypto.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E04C42B59C44B8CD6B50799C /* libcrypto.xcframework */; };
+		AC5106F52959EE4E00655416 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC5106F42959EE4E00655416 /* Launch Screen.storyboard */; };
+		B13645F2A0CA82A7F8DFCC0D /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1F6429EB9FEA75A9599DDAE /* Photos.framework */; };
+		BD54428282C5339A1FE60200 /* libios.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = CCDF425AB67B9BA7742CF34E /* libios.xcframework */; };
+		C7DA4913B96EC120AA1EBF75 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F649BC8E22721856DB0E40 /* libz.tbd */; };
+		CCDE49869F6A58E07F5D0E4D /* libkivy.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46FE4993AADFCF6603C30F27 /* libkivy.xcframework */; };
+		D1EA4170A58BFD821CF47876 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3ACB4C249C3F7145EA281104 /* libsqlite3.tbd */; };
+		D7F94D96B6BB650E9F95CD28 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CDE46988B8095EB0D0CD6D5 /* CoreMotion.framework */; };
+		DC844E58A4E11131AB797A77 /* libffi.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 550A426FA33DB1EC9F9EEA69 /* libffi.xcframework */; };
+		DC8F41B5901AA8DAC2326FDD /* libSDL2_ttf.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA6E4F56AD49B9CFCFD3F08E /* libSDL2_ttf.xcframework */; };
+		E825434C8125BC9168BF266F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0BA4CD7B1852883855D747A /* QuartzCore.framework */; };
+		EA1545A0986A89C249CDE910 /* libfreetype.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0C24A879DB7074798E3A1E1 /* libfreetype.xcframework */; };
+		ECC84429B0A4B3FB4346ECF9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EF945E5A4C4947CB5ACC172 /* WebKit.framework */; };
+		EE23409EBF292107E036BDA0 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 116143FAAA9FC48EFC7DE78B /* GameController.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		01532DA9137C099F0076F6BF /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		05684B3EBC5395B2CA094D27 /* libpython3.11.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libpython3.11.xcframework; path = ../dist/xcframework/libpython3.11.xcframework; sourceTree = SOURCE_ROOT; };
+		085649E6AC0023B75B5651EC /* libpyobjus.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libpyobjus.xcframework; path = ../dist/xcframework/libpyobjus.xcframework; sourceTree = SOURCE_ROOT; };
+		116143FAAA9FC48EFC7DE78B /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = GameController.framework; sourceTree = DEVELOPER_DIR; };
+		17E24DC289619D2D57578427 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = MessageUI.framework; sourceTree = DEVELOPER_DIR; };
+		1D6058910D05DD3D006BFB54 /* pharmaglobe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pharmaglobe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		265F496289A4DA361556C844 /* libSDL2_mixer.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libSDL2_mixer.xcframework; path = ../dist/xcframework/libSDL2_mixer.xcframework; sourceTree = SOURCE_ROOT; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2B1F4E7394F79A0E6E776BAA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		2CB5F34517D5233A006187AB /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = SOURCE_ROOT; };
+		2CB5F34617D5233A006187AB /* bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = bridge.m; sourceTree = SOURCE_ROOT; };
+		31AA4ADAABABFEDA99FE6456 /* libSDL2_image.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libSDL2_image.xcframework; path = ../dist/xcframework/libSDL2_image.xcframework; sourceTree = SOURCE_ROOT; };
+		35634738B68A8A80A3A9388B /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
+		3ACB4C249C3F7145EA281104 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = libsqlite3.tbd; sourceTree = DEVELOPER_DIR; };
+		3BF149D19613194CAF965F50 /* libpillow.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libpillow.xcframework; path = ../dist/xcframework/libpillow.xcframework; sourceTree = SOURCE_ROOT; };
+		3C6B4EBDB8EA9A36BFF30756 /* libjpeg.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libjpeg.xcframework; path = ../dist/xcframework/libjpeg.xcframework; sourceTree = SOURCE_ROOT; };
+		455F4FA4B214A5B3871F3839 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
+		46FE4993AADFCF6603C30F27 /* libkivy.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libkivy.xcframework; path = ../dist/xcframework/libkivy.xcframework; sourceTree = SOURCE_ROOT; };
+		550A426FA33DB1EC9F9EEA69 /* libffi.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libffi.xcframework; path = ../dist/xcframework/libffi.xcframework; sourceTree = SOURCE_ROOT; };
+		56EB4F0AA53F6C46492E343D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = Metal.framework; sourceTree = DEVELOPER_DIR; };
+		59738AB41A8BB5D8001B2C0C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = "/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/python3/lib"; sourceTree = "<group>"; };
+		59738ABA1A8E19AA001B2C0C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = pharmaglobe/Images.xcassets; sourceTree = "<group>"; };
+		59994E3A148E85C800863906 /* YourApp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = YourApp; sourceTree = "<group>"; };
+		59FDEA8A21E7D34E004E6ECE /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = "/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/python3/include"; sourceTree = "<group>"; };
+		5D624436AB9FB34F94507493 /* libssl.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libssl.xcframework; path = ../dist/xcframework/libssl.xcframework; sourceTree = SOURCE_ROOT; };
+		6FC9402A936AA6AC8DEF0AA8 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = libbz2.tbd; sourceTree = DEVELOPER_DIR; };
+		75F649BC8E22721856DB0E40 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = libz.tbd; sourceTree = DEVELOPER_DIR; };
+		8D1107310486CEB800E47090 /* pharmaglobe-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "pharmaglobe-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		9A2846E0A3427721EE461132 /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = CoreHaptics.framework; sourceTree = DEVELOPER_DIR; };
+		9CDE46988B8095EB0D0CD6D5 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = CoreMotion.framework; sourceTree = DEVELOPER_DIR; };
+		9EF945E5A4C4947CB5ACC172 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = WebKit.framework; sourceTree = DEVELOPER_DIR; };
+		A04D4079BBB7E216B3F82D40 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		AC5106F42959EE4E00655416 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Storyboards/Launch Screen.storyboard"; sourceTree = "<group>"; };
+		B12E480AA000E623DEFBBDB9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
+		B61B4BB0BE940370205D90CD /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = ImageIO.framework; sourceTree = DEVELOPER_DIR; };
+		B7F6440BB52631A806646D72 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
+		B9404D26B6FCF5A50AB24517 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		C0C24A879DB7074798E3A1E1 /* libfreetype.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libfreetype.xcframework; path = ../dist/xcframework/libfreetype.xcframework; sourceTree = SOURCE_ROOT; };
+		C1F6429EB9FEA75A9599DDAE /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = Photos.framework; sourceTree = DEVELOPER_DIR; };
+		C7EF478092CEC252FC6B8299 /* libSDL2.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libSDL2.xcframework; path = ../dist/xcframework/libSDL2.xcframework; sourceTree = SOURCE_ROOT; };
+		CCDF425AB67B9BA7742CF34E /* libios.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libios.xcframework; path = ../dist/xcframework/libios.xcframework; sourceTree = SOURCE_ROOT; };
+		D0BA4CD7B1852883855D747A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
+		D8FB4302B8688E3C030C7B51 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
+		E04C42B59C44B8CD6B50799C /* libcrypto.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libcrypto.xcframework; path = ../dist/xcframework/libcrypto.xcframework; sourceTree = SOURCE_ROOT; };
+		EA6E4F56AD49B9CFCFD3F08E /* libSDL2_ttf.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libSDL2_ttf.xcframework; path = ../dist/xcframework/libSDL2_ttf.xcframework; sourceTree = SOURCE_ROOT; };
+		EF4B4A91BD63D6A11ED512C6 /* libpng16.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libpng16.xcframework; path = ../dist/xcframework/libpng16.xcframework; sourceTree = SOURCE_ROOT; };
+		F3914B13A1F8B698D4BC7B54 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "libc++.tbd"; sourceTree = DEVELOPER_DIR; };
+		F3A242769CBE14B9CEA1451A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Accelerate.framework; sourceTree = DEVELOPER_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1D60588F0D05DD3D006BFB54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				780C4A4E9CD84A025F813701 /* MobileCoreServices.framework in Frameworks */,
+				1E834B91808AB55AFA3E19DB /* CoreVideo.framework in Frameworks */,
+				ECC84429B0A4B3FB4346ECF9 /* WebKit.framework in Frameworks */,
+				666D4FF0A2B0CECC6F4F0C3E /* CoreGraphics.framework in Frameworks */,
+				1B1C4C62BB909348327ACD09 /* CoreMedia.framework in Frameworks */,
+				682041E583797E7D2B989858 /* UIKit.framework in Frameworks */,
+				25BF4271A63D4BA6F26EA1EC /* ImageIO.framework in Frameworks */,
+				3E574385B78AC3DCC5EEC60D /* Metal.framework in Frameworks */,
+				E825434C8125BC9168BF266F /* QuartzCore.framework in Frameworks */,
+				EE23409EBF292107E036BDA0 /* GameController.framework in Frameworks */,
+				75D34332BE8E7CEBE5702387 /* MessageUI.framework in Frameworks */,
+				2CBF44D680EEBA8AB8F6D27D /* Accelerate.framework in Frameworks */,
+				D7F94D96B6BB650E9F95CD28 /* CoreMotion.framework in Frameworks */,
+				8A854B73AE49BE3324B1FE1D /* AudioToolbox.framework in Frameworks */,
+				6D1E42449505DD8CFA4EB48D /* CoreHaptics.framework in Frameworks */,
+				3B484ADC8C21FB563F01D3B6 /* AVFoundation.framework in Frameworks */,
+				B13645F2A0CA82A7F8DFCC0D /* Photos.framework in Frameworks */,
+				39F24D068BAA9CBDE03C9F59 /* OpenGLES.framework in Frameworks */,
+				D1EA4170A58BFD821CF47876 /* libsqlite3.tbd in Frameworks */,
+				98FC4C3DBBC7B6EA99127D43 /* libc++.tbd in Frameworks */,
+				22334B7C9D7ADA3E39EB8D22 /* libbz2.tbd in Frameworks */,
+				C7DA4913B96EC120AA1EBF75 /* libz.tbd in Frameworks */,
+				8BFE4144B2E0CC2D40A40CC2 /* libSDL2_mixer.xcframework in Frameworks */,
+				6DD245D9AB843910DF5836DC /* libpython3.11.xcframework in Frameworks */,
+				47ED49E097F4C4C208A71714 /* libpng16.xcframework in Frameworks */,
+				9EEF4464BD365A3664102B5C /* libSDL2.xcframework in Frameworks */,
+				1C5A400F86DCB82688C6D976 /* libpillow.xcframework in Frameworks */,
+				89874B40BDF1DE38E59F07ED /* libjpeg.xcframework in Frameworks */,
+				DC844E58A4E11131AB797A77 /* libffi.xcframework in Frameworks */,
+				DC8F41B5901AA8DAC2326FDD /* libSDL2_ttf.xcframework in Frameworks */,
+				9E05491F8890C5083F3E5F20 /* libssl.xcframework in Frameworks */,
+				746E4EE1BB3A69B3537074D8 /* libpyobjus.xcframework in Frameworks */,
+				9FE94E92B3AD707C1EC6DAA7 /* libcrypto.xcframework in Frameworks */,
+				CCDE49869F6A58E07F5D0E4D /* libkivy.xcframework in Frameworks */,
+				3D5B445C86F327AE74AB1D3D /* libSDL2_image.xcframework in Frameworks */,
+				EA1545A0986A89C249CDE910 /* libfreetype.xcframework in Frameworks */,
+				BD54428282C5339A1FE60200 /* libios.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				2CB5F34517D5233A006187AB /* bridge.h */,
+				2CB5F34617D5233A006187AB /* bridge.m */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1D6058910D05DD3D006BFB54 /* pharmaglobe.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+			isa = PBXGroup;
+			children = (
+				AC5106F32959EE3800655416 /* Storyboards */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = CustomTemplate;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				29B97316FDCFA39411CA2CEA /* main.m */,
+				59994E3A148E85C800863906 /* YourApp */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				59738ABA1A8E19AA001B2C0C /* Images.xcassets */,
+				59738AB41A8BB5D8001B2C0C /* lib */,
+				59FDEA8A21E7D34E004E6ECE /* include */,
+				01532DA9137C099F0076F6BF /* icon.png */,
+				8D1107310486CEB800E47090 /* pharmaglobe-Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				35634738B68A8A80A3A9388B /* MobileCoreServices.framework */,
+				455F4FA4B214A5B3871F3839 /* CoreVideo.framework */,
+				9EF945E5A4C4947CB5ACC172 /* WebKit.framework */,
+				B12E480AA000E623DEFBBDB9 /* CoreGraphics.framework */,
+				B7F6440BB52631A806646D72 /* CoreMedia.framework */,
+				A04D4079BBB7E216B3F82D40 /* UIKit.framework */,
+				B61B4BB0BE940370205D90CD /* ImageIO.framework */,
+				56EB4F0AA53F6C46492E343D /* Metal.framework */,
+				D0BA4CD7B1852883855D747A /* QuartzCore.framework */,
+				116143FAAA9FC48EFC7DE78B /* GameController.framework */,
+				17E24DC289619D2D57578427 /* MessageUI.framework */,
+				F3A242769CBE14B9CEA1451A /* Accelerate.framework */,
+				9CDE46988B8095EB0D0CD6D5 /* CoreMotion.framework */,
+				B9404D26B6FCF5A50AB24517 /* AudioToolbox.framework */,
+				9A2846E0A3427721EE461132 /* CoreHaptics.framework */,
+				2B1F4E7394F79A0E6E776BAA /* AVFoundation.framework */,
+				C1F6429EB9FEA75A9599DDAE /* Photos.framework */,
+				D8FB4302B8688E3C030C7B51 /* OpenGLES.framework */,
+				3ACB4C249C3F7145EA281104 /* libsqlite3.tbd */,
+				F3914B13A1F8B698D4BC7B54 /* libc++.tbd */,
+				6FC9402A936AA6AC8DEF0AA8 /* libbz2.tbd */,
+				75F649BC8E22721856DB0E40 /* libz.tbd */,
+				265F496289A4DA361556C844 /* libSDL2_mixer.xcframework */,
+				05684B3EBC5395B2CA094D27 /* libpython3.11.xcframework */,
+				EF4B4A91BD63D6A11ED512C6 /* libpng16.xcframework */,
+				C7EF478092CEC252FC6B8299 /* libSDL2.xcframework */,
+				3BF149D19613194CAF965F50 /* libpillow.xcframework */,
+				3C6B4EBDB8EA9A36BFF30756 /* libjpeg.xcframework */,
+				550A426FA33DB1EC9F9EEA69 /* libffi.xcframework */,
+				EA6E4F56AD49B9CFCFD3F08E /* libSDL2_ttf.xcframework */,
+				5D624436AB9FB34F94507493 /* libssl.xcframework */,
+				085649E6AC0023B75B5651EC /* libpyobjus.xcframework */,
+				E04C42B59C44B8CD6B50799C /* libcrypto.xcframework */,
+				46FE4993AADFCF6603C30F27 /* libkivy.xcframework */,
+				31AA4ADAABABFEDA99FE6456 /* libSDL2_image.xcframework */,
+				C0C24A879DB7074798E3A1E1 /* libfreetype.xcframework */,
+				CCDF425AB67B9BA7742CF34E /* libios.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AC5106F32959EE3800655416 /* Storyboards */ = {
+			isa = PBXGroup;
+			children = (
+				AC5106F42959EE4E00655416 /* Launch Screen.storyboard */,
+			);
+			name = Storyboards;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D6058900D05DD3D006BFB54 /* pharmaglobe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "pharmaglobe" */;
+			buildPhases = (
+				113D17E2153E3DB5001310A5 /* ShellScript */,
+				113D17E2153E3DB5001310A6 /* ShellScript */,
+				113D17E2153E3DB5001310A7 /* ShellScript */,
+				1D60588D0D05DD3D006BFB54 /* Resources */,
+				1D60588E0D05DD3D006BFB54 /* Sources */,
+				1D60588F0D05DD3D006BFB54 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = pharmaglobe;
+			productName = pharmaglobe;
+			productReference = 1D6058910D05DD3D006BFB54 /* pharmaglobe.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+			};
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "pharmaglobe" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D6058900D05DD3D006BFB54 /* pharmaglobe */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1D60588D0D05DD3D006BFB54 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				59738AB51A8BB5D8001B2C0C /* lib in Resources */,
+				AC5106F52959EE4E00655416 /* Launch Screen.storyboard in Resources */,
+				59FDEA8B21E7D34E004E6ECE /* include in Resources */,
+				59738ABB1A8E19AA001B2C0C /* Images.xcassets in Resources */,
+				01532DAA137C099F0076F6BF /* icon.png in Resources */,
+				59994E3B148E85C800863906 /* YourApp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		113D17E2153E3DB5001310A5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "rsync -av --delete --exclude=\".venv/\" --exclude=\"build/\" --exclude=\"dist/\" --exclude=\".cache/\" --exclude=\"pharmaglobe-ios/\" --exclude=\".git/\" \"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile\"/ \"$PROJECT_DIR\"/YourApp";
+		};
+		113D17E2153E3DB5001310A6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/hostpython3/bin/python -m compileall -f -b \"$PROJECT_DIR\"/YourApp";
+		};
+		113D17E2153E3DB5001310A7 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py' -delete";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1D60588E0D05DD3D006BFB54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				2CB5F34717D5233A006187AB /* bridge.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D6058940D05DD3E006BFB54 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				EXCLUDED_ARCHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/frameworks",
+					"$(SRCROOT)/../dist/xcframework",
+					"$(inherited)",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/python3/include/python3.11/**",
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/include/common/sdl2",
+				);
+				INFOPLIST_FILE = "pharmaglobe-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/lib",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-all_load";
+				PRODUCT_NAME = pharmaglobe;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		1D6058950D05DD3E006BFB54 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
+				COPY_PHASE_STRIP = NO;
+				EXCLUDED_ARCHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/frameworks",
+					"$(SRCROOT)/../dist/xcframework",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/python3/include/python3.11/**",
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/include/common/sdl2",
+				);
+				INFOPLIST_FILE = "pharmaglobe-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/lib",
+				);
+				OTHER_LDFLAGS = "-all_load";
+				PRODUCT_NAME = pharmaglobe;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				STRIP_INSTALLED_PRODUCT = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				DEAD_CODE_STRIPPING = NO;
+				ENABLE_BITCODE = NO;
+				USER_HEADER_SEARCH_PATHS = "/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/include/";
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				DEAD_CODE_STRIPPING = NO;
+				ENABLE_BITCODE = NO;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				USER_HEADER_SEARCH_PATHS = "/Users/upadhayaysandesh/.gemini/antigravity/scratch/pharmaglobe-mobile/dist/root/include/";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "pharmaglobe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D6058940D05DD3E006BFB54 /* Debug */,
+				1D6058950D05DD3E006BFB54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "pharmaglobe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}

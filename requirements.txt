@@ -1,0 +1,6 @@
+kivy>=2.2.0
+kivymd>=1.1.0
+pillow>=10.0.0
+requests>=2.31.0
+opencv-python-headless>=4.8.0.0
+google-generativeai>=0.3.0
