@@ -56,6 +56,10 @@ KV = """
 <ScrollView>:
     scroll_distance: dp(10)
     scroll_timeout: 500
+    scroll_wheel_distance: dp(40)
+    smooth_scroll_end: 5
+    scroll_type: ['content', 'bars']
+    bar_width: dp(4)
 
 <SafeIconButton@MDCard>:
     icon: ""
@@ -1138,7 +1142,7 @@ ScreenManager:
                                     MDCard:
                                         size_hint: None, None
                                         size: dp(48), dp(48)
-                                        radius: [dp(14)]
+                                        radius: [dp(24)]
                                         md_bg_color: 1.0, 0.42, 0.36, 1
                                         elevation: 0
                                         ripple_behavior: True

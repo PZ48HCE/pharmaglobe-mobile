@@ -124,8 +124,8 @@ KV = """
 #:import SmoothScrollEffect __main__.SmoothScrollEffect
 <ScrollView>:
     effect_cls: SmoothScrollEffect
-    scroll_wheel_distance: dp(60)
-    smooth_scroll_end: 10
+    scroll_wheel_distance: dp(40)
+    smooth_scroll_end: 5
     scroll_type: ['content', 'bars']
     bar_width: dp(4)
 
@@ -1210,7 +1210,7 @@ ScreenManager:
                                     MDCard:
                                         size_hint: None, None
                                         size: dp(48), dp(48)
-                                        radius: [dp(14)]
+                                        radius: [dp(24)]
                                         md_bg_color: 1.0, 0.42, 0.36, 1
                                         elevation: 0
                                         ripple_behavior: True
