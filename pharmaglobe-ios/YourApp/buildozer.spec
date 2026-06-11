@@ -20,7 +20,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy==2.2.0,kivymd==1.1.0,pillow,requests,numpy,opencv,google-generativeai,legacy-cgi
+requirements = python3==3.11,kivy==2.2.0,kivymd==1.1.0,pillow,requests,numpy,opencv,google-generativeai,legacy-cgi
 
 # (str) Custom source folders for requirements
 # (list) Permissions
