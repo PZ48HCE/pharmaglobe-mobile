@@ -124,6 +124,10 @@ KV = """
 #:import SmoothScrollEffect __main__.SmoothScrollEffect
 <ScrollView>:
     effect_cls: SmoothScrollEffect
+    scroll_wheel_distance: dp(60)
+    smooth_scroll_end: 10
+    scroll_type: ['content', 'bars']
+    bar_width: dp(4)
 
 <SafeIconButton@MDCard>:
     icon: ""
