@@ -70,7 +70,13 @@ jobs:
 
       - name: Build Android debug APK
         run: |
-          buildozer android debug 2>&1 | tee buildozer.log
+          buildozer android debug > buildozer.log 2>&1
+
+      - name: Print Buildozer Log on Failure
+        if: failure()
+        run: |
+          echo "=== BUILDOZER FAILURE LOG (LAST 300 LINES) ==="
+          tail -n 300 buildozer.log
 
       - name: Upload Buildozer Log
         if: always()
@@ -85,4 +91,5 @@ jobs:
         with:
           name: PharmaGlobe-Android-Debug
           path: bin/*.apk
+
 
