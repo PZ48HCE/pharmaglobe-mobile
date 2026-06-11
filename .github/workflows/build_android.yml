@@ -70,10 +70,19 @@ jobs:
 
       - name: Build Android debug APK
         run: |
-          buildozer android debug
+          buildozer android debug 2>&1 | tee buildozer.log
+
+      - name: Upload Buildozer Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Buildozer-Compilation-Log
+          path: buildozer.log
 
       - name: Upload APK Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: PharmaGlobe-Android-Debug
           path: bin/*.apk
+
