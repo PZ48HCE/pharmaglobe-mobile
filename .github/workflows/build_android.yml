@@ -70,8 +70,9 @@ jobs:
 
       - name: Build Android debug APK
         run: |
-          buildozer android clean
+          buildozer android clean || true
           buildozer android debug > buildozer.log 2>&1
+
 
 
       - name: Print Buildozer Log on Failure
