@@ -33,7 +33,7 @@ android.api = 33
 android.accept_sdk_license = True
 
 # (int) Minimum API your APK will support.
-android.minapi = 21
+android.minapi = 24
 
 # (str) Android NDK version to use
 # android.ndk = 25b
