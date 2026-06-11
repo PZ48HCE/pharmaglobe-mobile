@@ -29,6 +29,9 @@ android.permissions = INTERNET, CAMERA, WRITE_EXTERNAL_STORAGE
 # (int) Target Android API, should be as high as possible.
 android.api = 33
 
+# (bool) If True, then automatically accept SDK license agreements.
+android.accept_sdk_license = True
+
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
