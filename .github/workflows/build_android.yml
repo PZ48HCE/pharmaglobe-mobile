@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Source Code
@@ -114,5 +116,21 @@ jobs:
         with:
           name: PharmaGlobe-Android-Debug
           path: bin/*.apk
+
+      - name: Create or Update GitHub Release
+        if: success() && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Android APK Build
+          body: |
+            Here is the latest compiled debug APK of PharmaGlobe Mobile.
+            
+            Download it directly on your Android device to install and run the application.
+          draft: false
+          prerelease: false
+          files: bin/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 

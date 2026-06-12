@@ -27,6 +27,13 @@ import kivy.app
 kivy.app.App.get_running_app = MagicMock(return_value=app_mock)
 
 import main
+from kivy.lang import Builder
+# Import SmoothScrollEffect to __main__ so KV compiler can find it
+import sys
+import types
+current_module = sys.modules[__name__]
+setattr(current_module, 'SmoothScrollEffect', main.SmoothScrollEffect)
+
 Builder.load_string(main.KV)
 
 class MockWidget:

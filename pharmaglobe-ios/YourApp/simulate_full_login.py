@@ -8,6 +8,7 @@ if 'KIVY_WINDOW' not in os.environ:
 from kivy.config import Config
 
 import main
+setattr(sys.modules[__name__], 'SmoothScrollEffect', main.SmoothScrollEffect)
 
 print("Initializing PharmaGlobeApp...")
 app = main.PharmaGlobeApp()

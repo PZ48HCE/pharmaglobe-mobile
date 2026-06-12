@@ -29,11 +29,12 @@ kivy.app.App.get_running_app = MagicMock(return_value=app_mock)
 
 import main
 from kivy.lang import Builder
-# Import SmoothScrollEffect to __main__ so KV compiler can find it
+# Import SmoothScrollEffect and FlagWidget to __main__ so KV compiler can find it
 import sys
 import types
-current_module = sys.modules[__name__]
+current_module = sys.modules['__main__']
 setattr(current_module, 'SmoothScrollEffect', main.SmoothScrollEffect)
+setattr(current_module, 'FlagWidget', main.FlagWidget)
 
 Builder.load_string(main.KV)
 import med_database
@@ -87,6 +88,7 @@ class TestPharmaGlobeLoginLogic(unittest.TestCase):
         app_mock.populate_location_chips = lambda: main.PharmaGlobeApp.populate_location_chips(app_mock)
         app_mock.populate_category_chips = lambda: main.PharmaGlobeApp.populate_category_chips(app_mock)
         app_mock.render_directory = lambda: main.PharmaGlobeApp.render_directory(app_mock)
+        app_mock.complete_login_flow = lambda m, v=None: main.PharmaGlobeApp.complete_login_flow(app_mock, m, v)
         
         # Call handle_login on main class
         main.PharmaGlobeApp.handle_login(app_mock, "Guest")

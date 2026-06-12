@@ -7,11 +7,13 @@ from PIL import Image as PILImage
 # Import Kivy core libraries
 from kivy.config import Config
 # Force multi-touch emulation off for clean clicks
-Config.set('input', 'mouse', 'mouse,multitouch_on_play')
+Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.widget import Widget
 from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty
+from kivy.graphics import Color, Rectangle, Ellipse, Line
 from kivy.clock import Clock
 Clock.max_iteration = 30
 from kivy.metrics import dp
@@ -55,8 +57,8 @@ class SmoothScrollEffect(DampedScrollEffect):
     """Custom scroll effect using damped scroll effect for natural rubber-band scrolling on iOS."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.friction = 0.02
-        self.min_velocity = 0.1
+        self.friction = 0.018
+        self.min_velocity = 0.05
 
 from kivy.uix.image import Image
 from kivy.network.urlrequest import UrlRequest
@@ -118,16 +120,121 @@ class UAAsyncImage(Image):
 Factory.register('UAAsyncImage', cls=UAAsyncImage)
 
 
+class FlagWidget(Widget):
+    country = StringProperty("Global (All)")
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(pos=self.draw_flag, size=self.draw_flag, country=self.draw_flag)
+        
+    def draw_flag(self, *args):
+        self.canvas.before.clear()
+        x, y = self.pos
+        w, h = self.size
+        if w <= 0 or h <= 0:
+            return
+            
+        c = self.country.lower()
+        with self.canvas.before:
+            if "japan" in c:
+                # White flag with red circle
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x, y), size=(w, h))
+                Color(0.9, 0.1, 0.1, 1)
+                r = min(w, h) * 0.55
+                Ellipse(pos=(x + (w - r) / 2, y + (h - r) / 2), size=(r, r))
+            elif "usa" in c:
+                # USA flag representation
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x, y), size=(w, h))
+                Color(0.9, 0.1, 0.1, 1)
+                stripe_h = h / 7
+                for i in range(0, 7, 2):
+                    Rectangle(pos=(x, y + i * stripe_h), size=(w, stripe_h))
+                # Blue canton
+                Color(0.1, 0.2, 0.6, 1)
+                Rectangle(pos=(x, y + h * 3/7), size=(w * 0.45, h * 4/7))
+            elif "france" in c:
+                # Blue, White, Red vertical bands
+                Color(0.05, 0.15, 0.45, 1)
+                Rectangle(pos=(x, y), size=(w/3, h))
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x + w/3, y), size=(w/3, h))
+                Color(0.9, 0.1, 0.1, 1)
+                Rectangle(pos=(x + 2*w/3, y), size=(w/3, h))
+            elif "spain" in c:
+                # Red, Yellow, Red horizontal bands
+                Color(0.9, 0.1, 0.1, 1)
+                Rectangle(pos=(x, y), size=(w, h))
+                Color(1, 0.8, 0, 1)
+                Rectangle(pos=(x, y + h/4), size=(w, h/2))
+            elif "germany" in c:
+                # Black, Red, Gold horizontal bands
+                Color(0.1, 0.1, 0.1, 1)
+                Rectangle(pos=(x, y + 2*h/3), size=(w, h/3))
+                Color(0.9, 0.1, 0.1, 1)
+                Rectangle(pos=(x, y + h/3), size=(w, h/3))
+                Color(1, 0.8, 0, 1)
+                Rectangle(pos=(x, y), size=(w, h/3))
+            elif "south korea" in c or "korea" in c:
+                # White background with red/blue taegeuk
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x, y), size=(w, h))
+                r = min(w, h) * 0.55
+                cx = x + w / 2
+                cy = y + h / 2
+                Color(0.9, 0.1, 0.1, 1)
+                Ellipse(pos=(cx - r/2, cy - r/2), size=(r, r), angle_start=0, angle_end=180)
+                Color(0.1, 0.2, 0.6, 1)
+                Ellipse(pos=(cx - r/2, cy - r/2), size=(r, r), angle_start=180, angle_end=360)
+            elif "uk" in c or "united kingdom" in c or "britain" in c:
+                # Blue background with red/white cross
+                Color(0.1, 0.2, 0.6, 1)
+                Rectangle(pos=(x, y), size=(w, h))
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x + w*0.4, y), size=(w*0.2, h))
+                Rectangle(pos=(x, y + h*0.4), size=(w, h*0.2))
+                Color(0.9, 0.1, 0.1, 1)
+                Rectangle(pos=(x + w*0.45, y), size=(w*0.1, h))
+                Rectangle(pos=(x, y + h*0.45), size=(w, h*0.1))
+            elif "india" in c:
+                # Saffron, White, Green horizontal bands
+                Color(1.0, 0.6, 0.2, 1)
+                Rectangle(pos=(x, y + 2*h/3), size=(w, h/3))
+                Color(1, 1, 1, 1)
+                Rectangle(pos=(x, y + h/3), size=(w, h/3))
+                Color(0.15, 0.6, 0.15, 1)
+                Rectangle(pos=(x, y), size=(w, h/3))
+                Color(0.1, 0.2, 0.6, 1)
+                r = h / 4
+                Ellipse(pos=(x + (w - r)/2, y + (h - r)/2), size=(r, r))
+            else:
+                # Global (All): Light blue earth circle
+                Color(0.85, 0.93, 1.0, 1.0)
+                Rectangle(pos=(x, y), size=(w, h))
+                Color(0.1, 0.45, 0.85, 0.7)
+                r = min(w, h) * 0.7
+                Ellipse(pos=(x + (w - r)/2, y + (h - r)/2), size=(r, r))
+                Color(1, 1, 1, 0.5)
+                Line(circle=(x + w/2, y + h/2, r/2, 0, 360), width=1)
+
+
+Factory.register('FlagWidget', cls=FlagWidget)
+
+
 # ==================== KV INTERFACE DESIGN ====================
 # Complete layout declaration in Kivy string language
 KV = """
 #:import SmoothScrollEffect __main__.SmoothScrollEffect
+#:import FlagWidget __main__.FlagWidget
 <ScrollView>:
     effect_cls: SmoothScrollEffect
     scroll_wheel_distance: dp(40)
-    smooth_scroll_end: 5
-    scroll_type: ['content', 'bars']
+    smooth_scroll_end: 10
+    scroll_type: ['content']
     bar_width: dp(4)
+    scroll_distance: dp(4)
+    scroll_timeout: 250
 
 <SafeIconButton@MDCard>:
     icon: ""
@@ -247,7 +354,7 @@ ScreenManager:
                         elevation: 2
 
                         MDLabel:
-                            text: "Sign In / Register"
+                            text: "Login / Register"
                             font_style: "Subtitle1"
                             bold: True
                             theme_text_color: "Custom"
@@ -359,12 +466,15 @@ ScreenManager:
                                 elevation: 0
                                 ripple_behavior: True
                                 on_release: app.handle_login("Google")
-                                MDIcon:
-                                    icon: "google"
-                                    theme_text_color: "Custom"
-                                    text_color: 0.85, 0.25, 0.2, 1
-                                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                                    halign: "center"
+                                AnchorLayout:
+                                    anchor_x: "center"
+                                    anchor_y: "center"
+                                    MDIcon:
+                                        icon: "google"
+                                        theme_text_color: "Custom"
+                                        text_color: 0.85, 0.25, 0.2, 1
+                                        size_hint: None, None
+                                        size: dp(24), dp(24)
 
                             MDCard:
                                 size_hint: None, None
@@ -374,12 +484,15 @@ ScreenManager:
                                 elevation: 0
                                 ripple_behavior: True
                                 on_release: app.handle_login("Facebook")
-                                MDIcon:
-                                    icon: "facebook"
-                                    theme_text_color: "Custom"
-                                    text_color: 0.2, 0.4, 0.8, 1
-                                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                                    halign: "center"
+                                AnchorLayout:
+                                    anchor_x: "center"
+                                    anchor_y: "center"
+                                    MDIcon:
+                                        icon: "facebook"
+                                        theme_text_color: "Custom"
+                                        text_color: 0.2, 0.4, 0.8, 1
+                                        size_hint: None, None
+                                        size: dp(24), dp(24)
 
                             MDCard:
                                 size_hint: None, None
@@ -389,12 +502,15 @@ ScreenManager:
                                 elevation: 0
                                 ripple_behavior: True
                                 on_release: app.handle_login("Apple")
-                                MDIcon:
-                                    icon: "apple"
-                                    theme_text_color: "Custom"
-                                    text_color: 0.1, 0.1, 0.12, 1
-                                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                                    halign: "center"
+                                AnchorLayout:
+                                    anchor_x: "center"
+                                    anchor_y: "center"
+                                    MDIcon:
+                                        icon: "apple"
+                                        theme_text_color: "Custom"
+                                        text_color: 0.1, 0.1, 0.12, 1
+                                        size_hint: None, None
+                                        size: dp(24), dp(24)
 
                             MDCard:
                                 size_hint: None, None
@@ -404,12 +520,15 @@ ScreenManager:
                                 elevation: 0
                                 ripple_behavior: True
                                 on_release: app.handle_login("Yahoo")
-                                MDIcon:
-                                    icon: "yahoo"
-                                    theme_text_color: "Custom"
-                                    text_color: 0.5, 0.2, 0.75, 1
-                                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                                    halign: "center"
+                                AnchorLayout:
+                                    anchor_x: "center"
+                                    anchor_y: "center"
+                                    MDIcon:
+                                        icon: "yahoo"
+                                        theme_text_color: "Custom"
+                                        text_color: 0.5, 0.2, 0.75, 1
+                                        size_hint: None, None
+                                        size: dp(24), dp(24)
 
                     MDTextButton:
                         text: "Continue as Guest"
@@ -456,6 +575,175 @@ ScreenManager:
 
                 Widget:
                     size_hint_y: 0.35
+
+    Screen:
+        name: "register_screen"
+        MDFloatLayout:
+            md_bg_color: 0.96, 0.97, 0.98, 1
+
+            Widget:
+                canvas.before:
+                    Color:
+                        rgba: 1.0, 0.42, 0.36, 0.05
+                    Ellipse:
+                        pos: dp(-100), dp(100)
+                        size: dp(400), dp(400)
+                    Color:
+                        rgba: 0.0, 0.55, 1.0, 0.04
+                    Ellipse:
+                        pos: dp(200), dp(-100)
+                        size: dp(400), dp(400)
+
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                size_hint: (1, 1)
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    padding: dp(24)
+                    spacing: dp(14)
+                    size_hint_y: None
+                    height: self.minimum_height
+                    pos_hint: {"center_x": 0.5}
+
+                    MDBoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: None
+                        height: dp(48)
+                        spacing: dp(10)
+
+                        MDIconButton:
+                            icon: "arrow-left"
+                            pos_hint: {"center_y": 0.5}
+                            on_release:
+                                root.transition.direction = "right"
+                                root.current = "login_screen"
+
+                        MDLabel:
+                            text: "Create Account"
+                            font_style: "H5"
+                            bold: True
+                            theme_text_color: "Custom"
+                            text_color: 0.1, 0.1, 0.12, 1
+                            pos_hint: {"center_y": 0.5}
+
+                    MDCard:
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(20)
+                        spacing: dp(12)
+                        radius: [24, 24, 24, 24]
+                        md_bg_color: 1, 1, 1, 1
+                        line_color: 0.9, 0.91, 0.94, 1
+                        line_width: 1
+                        pos_hint: {"center_x": 0.5}
+                        elevation: 2
+
+                        MDTextField:
+                            id: reg_first_name
+                            hint_text: "First Name"
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDTextField:
+                            id: reg_middle_name
+                            hint_text: "Middle Name (Optional)"
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDTextField:
+                            id: reg_surname
+                            hint_text: "Surname"
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDTextField:
+                            id: reg_username
+                            hint_text: "Username"
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDTextField:
+                            id: reg_gmail
+                            hint_text: "Gmail / Email Address"
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDBoxLayout:
+                            size_hint_y: None
+                            height: dp(56)
+                            spacing: dp(10)
+
+                            MDTextField:
+                                id: reg_age
+                                hint_text: "Age"
+                                input_filter: "int"
+                                mode: "rectangle"
+                                line_color_focus: 1.0, 0.42, 0.36, 1
+                                text_color_focus: 0.1, 0.1, 0.12, 1
+                                size_hint_x: 0.3
+
+                            MDTextField:
+                                id: reg_dob
+                                hint_text: "Date of Birth (YYYY-MM-DD)"
+                                mode: "rectangle"
+                                line_color_focus: 1.0, 0.42, 0.36, 1
+                                text_color_focus: 0.1, 0.1, 0.12, 1
+                                size_hint_x: 0.7
+
+                        MDBoxLayout:
+                            size_hint_y: None
+                            height: dp(56)
+                            spacing: dp(10)
+
+                            MDTextField:
+                                id: reg_height
+                                hint_text: "Height (cm) - Optional"
+                                mode: "rectangle"
+                                line_color_focus: 1.0, 0.42, 0.36, 1
+                                text_color_focus: 0.1, 0.1, 0.12, 1
+                                size_hint_x: 0.5
+
+                            MDTextField:
+                                id: reg_weight
+                                hint_text: "Weight (kg) - Optional"
+                                mode: "rectangle"
+                                line_color_focus: 1.0, 0.42, 0.36, 1
+                                text_color_focus: 0.1, 0.1, 0.12, 1
+                                size_hint_x: 0.5
+
+                        MDTextField:
+                            id: reg_password
+                            hint_text: "New Password"
+                            password: True
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDTextField:
+                            id: reg_confirm_password
+                            hint_text: "Confirm Password"
+                            password: True
+                            mode: "rectangle"
+                            line_color_focus: 1.0, 0.42, 0.36, 1
+                            text_color_focus: 0.1, 0.1, 0.12, 1
+
+                        MDRaisedButton:
+                            text: "Create Account & Login"
+                            md_bg_color: 0.0, 0.55, 1.0, 1
+                            text_color: 1, 1, 1, 1
+                            bold: True
+                            size_hint_x: 1
+                            height: dp(44)
+                            on_release: app.process_new_user_registration()
 
     Screen:
         name: "main_screen"
@@ -927,7 +1215,7 @@ ScreenManager:
                                                 theme_text_color: "Custom"
                                                 text_color: 0.0, 0.55, 1.0, 1
                                                 bold: True
-                                                on_release: app.show_dialog("Games", "Play games to win rewards! Coming soon.")
+                                                on_release: app.play_game()
 
                                         MDIcon:
                                             icon: "controller-classic"
@@ -1210,7 +1498,7 @@ ScreenManager:
                                     MDCard:
                                         size_hint: None, None
                                         size: dp(48), dp(48)
-                                        radius: [dp(24)]
+                                        radius: [dp(14)]
                                         md_bg_color: 1.0, 0.42, 0.36, 1
                                         elevation: 0
                                         ripple_behavior: True
@@ -1275,13 +1563,8 @@ ScreenManager:
                                                 line_width: 1
                                                 elevation: 0
                                                 pos_hint: {"center_y": 0.5}
-                                                Widget:
-                                                    canvas.before:
-                                                        Color:
-                                                            rgba: 0.9, 0.1, 0.1, 1
-                                                        Ellipse:
-                                                            pos: self.parent.x + dp(7), self.parent.y + dp(4)
-                                                            size: dp(10), dp(10)
+                                                FlagWidget:
+                                                    country: app.destination_country
                                             MDLabel:
                                                 text: app.destination_country
                                                 font_style: "Body2"
@@ -2295,6 +2578,11 @@ class PharmaGlobeApp(MDApp):
             "content": "Hello! I am the lead Developer of PharmaGlobe Mobile. I can explain the KivyMD frontend, Buildozer packaging specs, OpenCV scanners, or help you write code."
         }]
         
+        # Barcode Auto-scanning State
+        self.auto_scan_event = None
+        self.is_scanning_frame = False
+        self.scan_paused = False
+        
         # Populate initial wishlist items so the view feels premium immediately
         self.saved_items = ["Loxonin S (ロキソニンS)", "Pepto-Bismol"]
         
@@ -2342,7 +2630,7 @@ class PharmaGlobeApp(MDApp):
             if tab_name == "scanner":
                 self.start_camera()
             else:
-                self.root.ids.scanner_camera.play = False
+                self.stop_camera()
                 
         # Trigger dynamic rendering of tabs when active
         if tab_name == "wishlist":
@@ -2713,16 +3001,407 @@ class PharmaGlobeApp(MDApp):
 
     # ==================== AUTHENTICATION CONTROLLERS ====================
     def handle_login(self, method, value=None):
-        """Simulates native mobile login with loader transitions."""
-        if method == "mobile" and (not value or not value.strip()):
+        """Simulates native mobile and social login with credentials and OTP verification."""
+        if method == "Google":
+            self.show_social_credential_dialog(method)
+            return
+        elif method in ["Facebook", "Apple", "Yahoo"]:
+            self.show_secure_auth_dialog(method)
+            return
+        elif method == "mobile":
+            if not value or not value.strip():
+                return
+            self.show_mobile_otp_dialog(value)
+            return
+        elif method == "Guest":
+            self.complete_login_flow("Guest")
+            return
+
+    def show_secure_auth_dialog(self, provider):
+        import webbrowser
+        from kivymd.uix.label import MDLabel
+        from kivymd.uix.dialog import MDDialog
+        from kivymd.uix.button import MDRaisedButton
+        from kivy.metrics import dp
+        from kivymd.uix.boxlayout import MDBoxLayout
+        
+        self.social_provider = provider
+        
+        urls = {
+            "Facebook": "https://www.facebook.com/login",
+            "Apple": "https://appleid.apple.com",
+            "Yahoo": "https://login.yahoo.com"
+        }
+        url = urls.get(provider, "https://www.google.com")
+        
+        # Automatically open the login page in the user's browser
+        try:
+            webbrowser.open(url)
+        except Exception as e:
+            print(f"Failed to open browser URL: {e}", flush=True)
+            
+        # Determine brand color
+        brand_colors = {
+            "Facebook": (0.2, 0.4, 0.8, 1),
+            "Apple": (0.1, 0.1, 0.12, 1),
+            "Yahoo": (0.5, 0.2, 0.75, 1)
+        }
+        brand_color = brand_colors.get(provider, (1.0, 0.42, 0.36, 1))
+        
+        info_label = MDLabel(
+            text=(
+                f"We have opened {provider}'s official login page in your browser. "
+                "Please sign in there to authorize with PharmaGlobe.\n\n"
+                "Once completed, return to the app and click the button below to authorize and log in."
+            ),
+            font_style="Body2",
+            theme_text_color="Secondary",
+            size_hint_y=None,
+            height=dp(100)
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(110)
+        )
+        layout.add_widget(info_label)
+        
+        self.social_auth_dialog = MDDialog(
+            title=f"🔒 {provider} Secure Authorization",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Authorize & Login",
+                    md_bg_color=brand_color,
+                    on_release=lambda x: self.process_secure_auth_login()
+                ),
+                MDRaisedButton(
+                    text="Cancel",
+                    on_release=lambda x: self.social_auth_dialog.dismiss()
+                )
+            ]
+        )
+        self.social_auth_dialog.open()
+
+    def process_secure_auth_login(self):
+        provider = getattr(self, "social_provider", "Facebook")
+        self.social_auth_dialog.dismiss()
+        
+        # Create a mock authenticated email/username based on the provider
+        email = f"auth_user@{provider.lower()}.com"
+        
+        print("\n" + "="*50, flush=True)
+        print(f"         🔒 {provider.upper()} AUTHENTICATOR AUTHORIZED SUCCESSFUL 🔒         ", flush=True)
+        print("="*50, flush=True)
+        print(f"Authorized Email: {email}", flush=True)
+        print(f"Status          : Token Verified", flush=True)
+        print("="*50 + "\n", flush=True)
+        
+        # Complete login flow
+        self.login_method = provider
+        self.login_value = email
+        self.complete_login_flow(provider, email)
+
+
+    def show_social_credential_dialog(self, provider):
+        from kivymd.uix.textfield import MDTextField
+        from kivymd.uix.label import MDLabel
+        
+        self.social_provider = provider
+        
+        self.google_email = MDTextField(
+            hint_text=f"{provider} Username or Email Address",
+            mode="rectangle",
+            size_hint_y=None,
+            height=dp(48)
+        )
+        self.google_pass = MDTextField(
+            hint_text="Password",
+            password=True,
+            mode="rectangle",
+            size_hint_y=None,
+            height=dp(48)
+        )
+        self.google_info_label = MDLabel(
+            text=f"Login to your {provider} account, or register a new one to log in immediately (no OTP code verification required).",
+            font_style="Caption",
+            theme_text_color="Secondary",
+            size_hint_y=None,
+            height=dp(36)
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(160)
+        )
+        layout.add_widget(self.google_email)
+        layout.add_widget(self.google_pass)
+        layout.add_widget(self.google_info_label)
+        
+        self.login_cred_dialog = MDDialog(
+            title=f"🔑 {provider} Login & Register",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Login",
+                    md_bg_color=(1.0, 0.42, 0.36, 1),
+                    on_release=lambda x: self.process_social_sign_in()
+                ),
+                MDRaisedButton(
+                    text="Create Account",
+                    md_bg_color=(0.0, 0.55, 1.0, 1),
+                    on_release=lambda x: self.process_social_register()
+                ),
+                MDRaisedButton(
+                    text="Cancel",
+                    on_release=lambda x: self.login_cred_dialog.dismiss()
+                )
+            ]
+        )
+        self.login_cred_dialog.open()
+
+    def process_social_register(self):
+        email = self.google_email.text.strip()
+        password = self.google_pass.text.strip()
+        
+        # Dismiss credentials dialog
+        self.login_cred_dialog.dismiss()
+        
+        # Pre-populate register screen fields if user typed something
+        if email:
+            self.root.ids.reg_gmail.text = email
+        if password:
+            self.root.ids.reg_password.text = password
+            self.root.ids.reg_confirm_password.text = password
+            
+        # Direct user to the register screen
+        self.root.transition.direction = "left"
+        self.root.current = "register_screen"
+
+    def process_social_sign_in(self):
+        email = self.google_email.text.strip()
+        password = self.google_pass.text.strip()
+        provider = getattr(self, "social_provider", "Google")
+        
+        if not email or not password:
+            self.google_info_label.text = "Error: Email and password fields cannot be empty!"
+            self.google_info_label.theme_text_color = "Error"
             return
             
+        if not hasattr(self, 'registered_accounts'):
+            self.registered_accounts = {}
+            
+        # Pre-seed test account if database is completely empty
+        if not self.registered_accounts:
+            self.registered_accounts["test@gmail.com"] = {
+                "password": "test1234",
+                "username": "testuser",
+                "first_name": "Test",
+                "middle_name": "Not Specified",
+                "surname": "User",
+                "age": "25",
+                "dob": "2001-01-01",
+                "height": "175",
+                "weight": "70"
+            }
+            
+        # Check if the entered value is a registered gmail address or username
+        actual_email = None
+        if email in self.registered_accounts:
+            actual_email = email
+        else:
+            for acc_email, acc_details in self.registered_accounts.items():
+                if acc_details.get("username") == email:
+                    actual_email = acc_email
+                    break
+                    
+        # If the account doesn't exist, notify them
+        if not actual_email:
+            self.google_info_label.text = "Account not found! Click 'Create Account' to register."
+            self.google_info_label.theme_text_color = "Error"
+            return
+            
+        # If password doesn't match
+        account_data = self.registered_accounts[actual_email]
+        stored_password = account_data["password"] if isinstance(account_data, dict) else account_data
+        if stored_password != password:
+            self.google_info_label.text = "Incorrect password! Please try again."
+            self.google_info_label.theme_text_color = "Error"
+            return
+            
+        # Sign in successful!
+        print("\n" + "="*50, flush=True)
+        print(f"         🔑 {provider.upper()} USER LOGIN SUCCESSFUL 🔑         ", flush=True)
+        print("="*50, flush=True)
+        print(f"Username/Email: {actual_email}", flush=True)
+        print(f"Password      : {password}", flush=True)
+        print("="*50 + "\n", flush=True)
+        
+        self.login_cred_dialog.dismiss()
+        
+        # Complete login flow
+        self.login_method = provider
+        self.login_value = actual_email
+        self.complete_login_flow(provider, actual_email)
+
+    def process_new_user_registration(self):
+        # Read text fields
+        first_name = self.root.ids.reg_first_name.text.strip()
+        middle_name = self.root.ids.reg_middle_name.text.strip()
+        surname = self.root.ids.reg_surname.text.strip()
+        username = self.root.ids.reg_username.text.strip()
+        gmail = self.root.ids.reg_gmail.text.strip()
+        age = self.root.ids.reg_age.text.strip()
+        dob = self.root.ids.reg_dob.text.strip()
+        height = self.root.ids.reg_height.text.strip()
+        weight = self.root.ids.reg_weight.text.strip()
+        password = self.root.ids.reg_password.text.strip()
+        confirm_pass = self.root.ids.reg_confirm_password.text.strip()
+        
+        # Validation
+        if not first_name or not surname or not username or not gmail or not age or not dob or not password or not confirm_pass:
+            self.show_dialog("Validation Error", "All fields are required except Middle Name, height, and weight.")
+            return
+            
+        if password != confirm_pass:
+            self.show_dialog("Validation Error", "Passwords do not match. Please verify your password entry.")
+            return
+            
+        if not hasattr(self, 'registered_accounts'):
+            self.registered_accounts = {}
+            
+        if gmail in self.registered_accounts:
+            self.show_dialog("Registration Error", "An account with this gmail/email address already exists!")
+            return
+            
+        # Register the user details
+        self.registered_accounts[gmail] = {
+            "password": password,
+            "username": username,
+            "first_name": first_name,
+            "middle_name": middle_name if middle_name else "Not Specified",
+            "surname": surname,
+            "age": age,
+            "dob": dob,
+            "height": height if height else "Not Specified",
+            "weight": weight if weight else "Not Specified"
+        }
+        
+        # Log all credentials to the terminal in real time
+        print("\n" + "="*60, flush=True)
+        print("        🎉 NEW ACCOUNT REGISTERED SUCCESSFULLY 🎉        ", flush=True)
+        print("="*60, flush=True)
+        print(f"First Name   : {first_name}", flush=True)
+        print(f"Middle Name  : {middle_name if middle_name else 'Not Specified'}", flush=True)
+        print(f"Surname      : {surname}", flush=True)
+        print(f"Username     : {username}", flush=True)
+        print(f"Gmail Address: {gmail}", flush=True)
+        print(f"Age          : {age}", flush=True)
+        print(f"Date of Birth: {dob}", flush=True)
+        print(f"Height (Opt) : {height if height else 'Not Specified'}", flush=True)
+        print(f"Weight (Opt) : {weight if weight else 'Not Specified'}", flush=True)
+        print(f"Password     : {password}", flush=True)
+        print("="*60 + "\n", flush=True)
+        
+        # Clear fields
+        self.root.ids.reg_first_name.text = ""
+        self.root.ids.reg_middle_name.text = ""
+        self.root.ids.reg_surname.text = ""
+        self.root.ids.reg_username.text = ""
+        self.root.ids.reg_gmail.text = ""
+        self.root.ids.reg_age.text = ""
+        self.root.ids.reg_dob.text = ""
+        self.root.ids.reg_height.text = ""
+        self.root.ids.reg_weight.text = ""
+        self.root.ids.reg_password.text = ""
+        self.root.ids.reg_confirm_password.text = ""
+        
+        # Complete login flow directly
+        provider = getattr(self, "social_provider", "Google")
+        self.login_method = provider
+        self.login_value = gmail
+        self.complete_login_flow(provider, gmail)
+
+    def show_mobile_otp_dialog(self, phone):
+        # Generate 6-digit OTP
+        import random
+        self.login_otp = str(random.randint(100000, 999999))
+        self.login_method = "mobile"
+        self.login_value = phone
+        
+        # Print OTP to terminal
+        print("\n" + "="*50, flush=True)
+        print("          MOBILE LOGIN ATTEMPT          ", flush=True)
+        print("="*50, flush=True)
+        print(f"Phone Number: {phone}", flush=True)
+        print("-"*50, flush=True)
+        print(f"Simulating SMS OTP dispatch to {phone}...", flush=True)
+        print(f"--- [SMS OTP Verification Code]: {self.login_otp} ---", flush=True)
+        print("="*50 + "\n", flush=True)
+        
+        self.show_login_otp_dialog(phone)
+
+    def show_login_otp_dialog(self, value):
+        from kivymd.uix.textfield import MDTextField
+        self.otp_input = MDTextField(
+            hint_text="6-Digit Verification Code",
+            mode="rectangle",
+            size_hint_y=None,
+            height=dp(48)
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(70)
+        )
+        layout.add_widget(self.otp_input)
+        
+        self.otp_dialog = MDDialog(
+            title="💬 Enter OTP Code",
+            text=f"A simulated verification code has been sent to {value}. Please check your terminal logs for the OTP.",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Verify & Login",
+                    on_release=lambda x: self.verify_login_otp()
+                ),
+                MDRaisedButton(
+                    text="Cancel",
+                    on_release=lambda x: self.otp_dialog.dismiss()
+                )
+            ]
+        )
+        self.otp_dialog.open()
+
+    def verify_login_otp(self):
+        entered_otp = self.otp_input.text.strip()
+        if entered_otp == self.login_otp:
+            self.otp_dialog.dismiss()
+            # Complete the login
+            self.complete_login_flow(self.login_method, self.login_value)
+        else:
+            self.show_dialog("Invalid OTP", "The verification code you entered is incorrect. Please check the terminal logs for the code.")
+
+    def complete_login_flow(self, method, value=None):
         loader = self.root.ids.login_loader
         loader_text = self.root.ids.loader_text
         
-        # Configure and show loader
         if method == "mobile":
-            loader_text.text = f"Sending OTP to {value}..."
+            loader_text.text = f"Verifying SMS code for {value}..."
+        elif method in ["Google", "Facebook", "Apple", "Yahoo"]:
+            loader_text.text = f"Verifying {method} OAuth for {value}..."
         elif method == "Guest":
             loader_text.text = "Entering as Guest..."
         else:
@@ -2733,7 +3412,6 @@ class PharmaGlobeApp(MDApp):
         
         # Simulate verification latency
         def complete_login(dt):
-            print("AUTO-LOGIN: complete_login started")
             loader.opacity = 0
             loader.disabled = True
             
@@ -2751,16 +3429,316 @@ class PharmaGlobeApp(MDApp):
             
             self.root.transition.direction = "up"
             self.root.current = "main_screen"
-            print("AUTO-LOGIN: screen set to main_screen")
-            if os.environ.get("PHARMAGLOBE_AUTO_SCROLL") == "1":
-                def do_scroll(dt):
-                    print("AUTO-LOGIN: scrolling home_scroll to 0.0")
-                    if hasattr(self.root, "ids") and "home_scroll" in self.root.ids:
-                        self.root.ids.home_scroll.scroll_y = 0.0
-                        print("AUTO-LOGIN: scroll_y set to 0.0")
-                Clock.schedule_once(do_scroll, 1.0)
             
         Clock.schedule_once(complete_login, 1.2)
+
+    # ==================== GAME CONTROLLERS ====================
+    def play_game(self):
+        """Opens a game selection popup letting the user choose between Tic-Tac-Toe and Memory Match."""
+        # Create game selection buttons
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(12),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(110)
+        )
+        
+        btn_ttt = MDRaisedButton(
+            text="🎮 Doctor's Tic-Tac-Toe",
+            md_bg_color=(1.0, 0.42, 0.36, 1),
+            text_color=(1, 1, 1, 1),
+            bold=True,
+            size_hint_x=1,
+            on_release=lambda x: self.start_tic_tac_toe()
+        )
+        btn_mem = MDRaisedButton(
+            text="🧠 Doctor's Memory Match",
+            md_bg_color=(0.0, 0.55, 1.0, 1),
+            text_color=(1, 1, 1, 1),
+            bold=True,
+            size_hint_x=1,
+            on_release=lambda x: self.start_memory_match()
+        )
+        
+        layout.add_widget(btn_ttt)
+        layout.add_widget(btn_mem)
+        
+        self.game_selection_dialog = MDDialog(
+            title="🎮 Choose a Game to Play",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Close",
+                    on_release=lambda x: self.game_selection_dialog.dismiss()
+                )
+            ]
+        )
+        self.game_selection_dialog.open()
+
+    def start_tic_tac_toe(self):
+        """Launches a Tic-Tac-Toe game popup where the user plays against the AI Doctor."""
+        if hasattr(self, 'game_selection_dialog') and self.game_selection_dialog:
+            self.game_selection_dialog.dismiss()
+            
+        from kivy.uix.gridlayout import GridLayout
+        from kivy.uix.button import Button
+        
+        # Initialize board state
+        self.game_board = [""] * 9
+        self.game_buttons = []
+        self.game_dialog = None
+        
+        # Create a grid for the board buttons
+        grid = GridLayout(cols=3, spacing=dp(5), size_hint_y=None, height=dp(180))
+        
+        for i in range(9):
+            btn = Button(
+                text="",
+                font_size="24sp",
+                background_color=(0.95, 0.95, 0.95, 1),
+                color=(0.1, 0.1, 0.1, 1),
+                on_release=lambda x, idx=i: self.make_game_move(idx)
+            )
+            self.game_buttons.append(btn)
+            grid.add_widget(btn)
+            
+        self.game_status_label = MDLabel(
+            text="Your turn (X). Play against the AI Doctor!",
+            halign="center",
+            theme_text_color="Secondary",
+            size_hint_y=None,
+            height=dp(30)
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(230)
+        )
+        layout.add_widget(self.game_status_label)
+        layout.add_widget(grid)
+        
+        self.game_dialog = MDDialog(
+            title="🎮 Doctor's Tic-Tac-Toe",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Reset Game",
+                    on_release=lambda x: self.reset_game()
+                ),
+                MDRaisedButton(
+                    text="Close",
+                    on_release=lambda x: self.game_dialog.dismiss()
+                )
+            ]
+        )
+        self.game_dialog.open()
+
+    def start_memory_match(self):
+        """Launches a Memory Match game popup."""
+        if hasattr(self, 'game_selection_dialog') and self.game_selection_dialog:
+            self.game_selection_dialog.dismiss()
+            
+        from kivy.uix.gridlayout import GridLayout
+        from kivy.uix.button import Button
+        import random
+        
+        # Game state for memory match
+        # 8 pairs of symbols = 16 cards
+        symbols = ["🩺", "💊", "🩹", "💉", "🏥", "🧬", "🧪", "🌡️"] * 2
+        random.shuffle(symbols)
+        
+        self.memory_board = symbols
+        self.memory_revealed = [False] * 16
+        self.memory_selected = []
+        self.memory_buttons = []
+        self.memory_dialog = None
+        self.memory_busy = False # To prevent clicking during mismatch flip delay
+        
+        # Create a grid for the memory board (4x4)
+        grid = GridLayout(cols=4, spacing=dp(6), size_hint_y=None, height=dp(240))
+        
+        for i in range(16):
+            btn = Button(
+                text="?",
+                font_size="24sp",
+                background_color=(0.9, 0.9, 0.9, 1),
+                color=(0.3, 0.3, 0.3, 1),
+                on_release=lambda x, idx=i: self.make_memory_move(idx)
+            )
+            self.memory_buttons.append(btn)
+            grid.add_widget(btn)
+            
+        self.memory_status_label = MDLabel(
+            text="Tap cards to find the matching medical pairs!",
+            halign="center",
+            theme_text_color="Secondary",
+            size_hint_y=None,
+            height=dp(30)
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(10),
+            padding=[dp(10), dp(10), dp(10), dp(10)],
+            size_hint_y=None,
+            height=dp(290)
+        )
+        layout.add_widget(self.memory_status_label)
+        layout.add_widget(grid)
+        
+        self.memory_dialog = MDDialog(
+            title="🧠 Doctor's Memory Match",
+            type="custom",
+            content_cls=layout,
+            buttons=[
+                MDRaisedButton(
+                    text="Reset Game",
+                    on_release=lambda x: self.reset_memory_game()
+                ),
+                MDRaisedButton(
+                    text="Close",
+                    on_release=lambda x: self.memory_dialog.dismiss()
+                )
+            ]
+        )
+        self.memory_dialog.open()
+
+    def make_memory_move(self, idx):
+        if self.memory_busy or self.memory_revealed[idx] or idx in self.memory_selected:
+            return
+            
+        # Reveal card
+        self.memory_buttons[idx].text = self.memory_board[idx]
+        self.memory_buttons[idx].background_color = (1.0, 0.9, 0.9, 1) # Highlight revealed
+        self.memory_buttons[idx].color = (1.0, 0.42, 0.36, 1)
+        self.memory_selected.append(idx)
+        
+        if len(self.memory_selected) == 2:
+            self.memory_busy = True
+            idx1, idx2 = self.memory_selected
+            if self.memory_board[idx1] == self.memory_board[idx2]:
+                # Match found!
+                self.memory_revealed[idx1] = True
+                self.memory_revealed[idx2] = True
+                
+                # Keep them highlighted green
+                self.memory_buttons[idx1].background_color = (0.9, 1.0, 0.9, 1)
+                self.memory_buttons[idx1].color = (0.1, 0.7, 0.1, 1)
+                self.memory_buttons[idx2].background_color = (0.9, 1.0, 0.9, 1)
+                self.memory_buttons[idx2].color = (0.1, 0.7, 0.1, 1)
+                
+                self.memory_selected = []
+                self.memory_busy = False
+                
+                # Check for win
+                if all(self.memory_revealed):
+                    self.memory_status_label.text = "🎉 You matched all cards! +50 Health Points!"
+                    self.user_points += 50
+                else:
+                    self.memory_status_label.text = "Nice! You found a match!"
+            else:
+                # No match
+                self.memory_status_label.text = "Not a match! Try again..."
+                # Flip back after 0.8 seconds
+                Clock.schedule_once(lambda dt: self.flip_back_cards(idx1, idx2), 0.8)
+
+    def flip_back_cards(self, idx1, idx2):
+        self.memory_buttons[idx1].text = "?"
+        self.memory_buttons[idx1].background_color = (0.9, 0.9, 0.9, 1)
+        self.memory_buttons[idx1].color = (0.3, 0.3, 0.3, 1)
+        
+        self.memory_buttons[idx2].text = "?"
+        self.memory_buttons[idx2].background_color = (0.9, 0.9, 0.9, 1)
+        self.memory_buttons[idx2].color = (0.3, 0.3, 0.3, 1)
+        
+        self.memory_selected = []
+        self.memory_busy = False
+        self.memory_status_label.text = "Tap cards to find matching pairs."
+
+    def reset_memory_game(self):
+        import random
+        symbols = ["🩺", "💊", "🩹", "💉", "🏥", "🧬", "🧪", "🌡️"] * 2
+        random.shuffle(symbols)
+        self.memory_board = symbols
+        self.memory_revealed = [False] * 16
+        self.memory_selected = []
+        self.memory_busy = False
+        
+        for btn in self.memory_buttons:
+            btn.text = "?"
+            btn.background_color = (0.9, 0.9, 0.9, 1)
+            btn.color = (0.3, 0.3, 0.3, 1)
+            
+        self.memory_status_label.text = "Tap cards to find the matching medical pairs!"
+
+    def make_game_move(self, idx):
+        if self.game_board[idx] != "" or self.check_game_winner():
+            return
+            
+        # User move
+        self.game_board[idx] = "X"
+        self.game_buttons[idx].text = "X"
+        self.game_buttons[idx].color = (1.0, 0.42, 0.36, 1) # Red accent for user
+        self.game_buttons[idx].background_color = (1.0, 0.9, 0.9, 1)
+        
+        # Check if user won
+        winner = self.check_game_winner()
+        if winner == "X":
+            self.game_status_label.text = "🎉 You won! +50 Health Points added!"
+            self.user_points += 50
+            return
+        elif "" not in self.game_board:
+            self.game_status_label.text = "🤝 It's a draw!"
+            return
+            
+        # AI move (simple random empty spot)
+        self.game_status_label.text = "Doctor is thinking..."
+        Clock.schedule_once(lambda dt: self.make_ai_move(), 0.5)
+
+    def make_ai_move(self):
+        if "" not in self.game_board or self.check_game_winner():
+            return
+            
+        import random
+        empty_indices = [i for i, val in enumerate(self.game_board) if val == ""]
+        if empty_indices:
+            ai_idx = random.choice(empty_indices)
+            self.game_board[ai_idx] = "O"
+            self.game_buttons[ai_idx].text = "O"
+            self.game_buttons[ai_idx].color = (0, 0.55, 1.0, 1) # Blue accent for doctor
+            self.game_buttons[ai_idx].background_color = (0.9, 0.95, 1.0, 1)
+            
+            winner = self.check_game_winner()
+            if winner == "O":
+                self.game_status_label.text = "🤖 Doctor won! Try again!"
+            elif "" not in self.game_board:
+                self.game_status_label.text = "🤝 It's a draw!"
+            else:
+                self.game_status_label.text = "Your turn (X)."
+
+    def check_game_winner(self):
+        win_coords = [
+            (0, 1, 2), (3, 4, 5), (6, 7, 8), # rows
+            (0, 3, 6), (1, 4, 7), (2, 5, 8), # cols
+            (0, 4, 8), (2, 4, 6)             # diagonals
+        ]
+        for c1, c2, c3 in win_coords:
+            if self.game_board[c1] != "" and self.game_board[c1] == self.game_board[c2] == self.game_board[c3]:
+                return self.game_board[c1]
+        return None
+
+    def reset_game(self):
+        self.game_board = [""] * 9
+        for btn in self.game_buttons:
+            btn.text = ""
+            btn.background_color = (0.95, 0.95, 0.95, 1)
+        self.game_status_label.text = "Your turn (X). Play against the AI Doctor!"
 
     def handle_logout(self):
         """Logs the user out and slides down back to the login screen."""
@@ -3110,36 +4088,113 @@ class PharmaGlobeApp(MDApp):
     def start_camera(self):
         """Fires up the camera feed when the user switches to scanner."""
         self.root.ids.scanner_camera.play = True
+        self.scan_paused = False
+        self.is_scanning_frame = False
+        
+        # Start automatic background frame scanning loop (ticks every 0.3s)
+        if not self.auto_scan_event:
+            self.auto_scan_event = Clock.schedule_interval(self.auto_scan_tick, 0.3)
+            print("[Scanner] Automatic live barcode scanning loop started.")
+
+    def stop_camera(self):
+        """Stops the camera feed and automatic scanning loop."""
+        self.root.ids.scanner_camera.play = False
+        if self.auto_scan_event:
+            self.auto_scan_event.cancel()
+            self.auto_scan_event = None
+            print("[Scanner] Automatic live barcode scanning loop stopped.")
+
+    def auto_scan_tick(self, dt):
+        """Tick event that captures the current texture frame and decodes it in the background."""
+        if self.scan_paused or not self.root.ids.scanner_camera.play:
+            return
+            
+        if self.is_scanning_frame:
+            return
+            
+        cam = self.root.ids.scanner_camera
+        if not cam.texture:
+            return
+            
+        try:
+            # Capture frame directly from GPU texture memory (instant, no file writing lags)
+            size = cam.texture.size
+            pixels = cam.texture.pixels
+            colorfmt = cam.texture.colorfmt.upper()
+            if colorfmt in ['RGBA', 'BGRA']:
+                pil_img = PILImage.frombytes('RGBA', size, pixels)
+            else:
+                pil_img = PILImage.frombytes('RGB', size, pixels)
+                
+            self.is_scanning_frame = True
+            threading.Thread(target=self._auto_scan_frame_thread, args=(pil_img,), daemon=True).start()
+        except Exception as e:
+            pass
+
+    def _auto_scan_frame_thread(self, pil_img):
+        try:
+            code, code_type = barcode_helper.decode_barcode(pil_img)
+            if code:
+                # Successfully resolved a barcode in the live feed!
+                print(f"[AutoScan] Detected barcode: {code} ({code_type})")
+                Clock.schedule_once(lambda dt: self.handle_auto_scan_success(code), 0)
+            else:
+                self.is_scanning_frame = False
+        except Exception as e:
+            self.is_scanning_frame = False
+
+    def handle_auto_scan_success(self, code):
+        self.scan_paused = True  # Pause scanning to show details dialog/page
+        self.is_scanning_frame = False
+        self.resolve_barcode(code)
 
     def capture_and_scan(self):
-        """Captures the current frame and processes it via OpenCV."""
+        """Manual capture fallback trigger (keeps button active as an option)."""
         cam = self.root.ids.scanner_camera
         if not cam.play:
             return
             
-        # Capture photo to a local file
-        filepath = "temp_capture.png"
-        cam.export_to_png(filepath)
-        
-        # Read the file via PIL
-        try:
-            pil_img = PILImage.open(filepath)
-            code, code_type = barcode_helper.decode_barcode(pil_img)
-            
-            if code:
-                self.resolve_barcode(code)
-            else:
-                self.show_dialog("Scan Failed", "No barcode detected in the frame. Make sure the lighting is bright and the code is close to the lens.")
-        except Exception as e:
-            self.show_dialog("Error", f"Could not read camera frame: {e}")
-        finally:
-            # Clean up temp file
-            if os.path.exists(filepath):
-                os.remove(filepath)
+        self.scan_paused = True
+        pil_img = None
+        if cam.texture:
+            try:
+                size = cam.texture.size
+                pixels = cam.texture.pixels
+                colorfmt = cam.texture.colorfmt.upper()
+                if colorfmt in ['RGBA', 'BGRA']:
+                    pil_img = PILImage.frombytes('RGBA', size, pixels)
+                else:
+                    pil_img = PILImage.frombytes('RGB', size, pixels)
+            except Exception as e:
+                pass
+                
+        if pil_img:
+            threading.Thread(target=self._scan_frame_thread, args=(pil_img,), daemon=True).start()
+        else:
+            self.show_dialog(
+                "Scan Failed", 
+                "Could not capture frame from the camera stream.",
+                on_dismiss=lambda: setattr(self, "scan_paused", False)
+            )
+
+    def _scan_frame_thread(self, pil_img):
+        code, code_type = barcode_helper.decode_barcode(pil_img)
+        if code:
+            Clock.schedule_once(lambda dt: self.resolve_barcode(code), 0)
+        else:
+            def resume():
+                self.scan_paused = False
+                self.is_scanning_frame = False
+            Clock.schedule_once(lambda dt: self.show_dialog(
+                "Scan Failed", 
+                "No barcode detected in the frame. Make sure the lighting is bright, the code is close to the lens, and the image is in focus.",
+                on_dismiss=resume
+            ), 0)
 
     def execute_manual_scan(self):
         barcode = self.root.ids.manual_barcode_field.text.strip()
         if barcode:
+            self.scan_paused = True
             self.resolve_barcode(barcode)
 
     def resolve_barcode(self, barcode):
@@ -3169,7 +4224,14 @@ class PharmaGlobeApp(MDApp):
             }
             self.show_medication_details(card_data)
         else:
-            self.show_dialog("Not Found", f"Barcode `{barcode}` could not be resolved in the registries.")
+            def resume():
+                self.scan_paused = False
+                self.is_scanning_frame = False
+            self.show_dialog(
+                "Not Found", 
+                f"Barcode `{barcode}` could not be resolved in the registries.",
+                on_dismiss=resume
+            )
 
     # ==================== AI CHAT CONTROLLERS ====================
     def toggle_chat_persona(self):
@@ -3298,17 +4360,24 @@ class PharmaGlobeApp(MDApp):
         self.key_dialog.open()
 
     # ==================== UTILITY POPUPS ====================
-    def show_dialog(self, title, text):
+    def show_dialog(self, title, text, on_dismiss=None):
+        def handle_dismiss(x):
+            dialog.dismiss()
+            if on_dismiss:
+                on_dismiss()
         dialog = MDDialog(
             title=title,
             text=text,
-            buttons=[MDRaisedButton(text="Close", on_release=lambda x: dialog.dismiss())]
+            buttons=[MDRaisedButton(text="Close", on_release=handle_dismiss)]
         )
         dialog.open()
 
     def go_back_to_main(self):
         self.root.transition.direction = "right"
         self.root.current = "main_screen"
+        # Resume automatic live scanning
+        self.scan_paused = False
+        self.is_scanning_frame = False
 
     def show_medication_details(self, med):
         """Constructs a detailed popup displaying the medicine's specifications."""

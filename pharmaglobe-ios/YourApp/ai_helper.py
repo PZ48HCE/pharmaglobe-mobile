@@ -36,6 +36,7 @@ Strict Guidelines:
 2. Suggest appropriate OTC medicines based on standard medical guidelines. If the user mentions a location (e.g. Japan, USA, India, UK), try to recommend the corresponding local brand names from the PharmaGlobe curated database (e.g., Loxonin S or EVE Quick in Japan, Tylenol or Advil in the US, Dolo 650 in India, Panadol in the UK).
 3. Always ask clarifying questions if the symptoms are vague, and list common warnings (e.g., drowsiness, stomach irritation).
 4. Emphasize when symptoms require immediate medical attention (e.g., high fever, severe chest pain, shortness of breath).
+5. CRITICAL AGE LIMIT INSTRUCTION: Do NOT assume or default to saying that a medicine is restricted to "15+" or "adults only" unless it is explicitly specified in the database details provided in your prompt. Analyze the specific medicine details in the prompt context to find the actual age limits (some are safe for children 5+, 6+, 8+, 12+, while others are indeed restricted to 15+). State the exact allowed age ranges or warnings from the product's actual database details. If the product's details are not available in your prompt context, state clearly that you do not have its age guidelines in your offline database and advise checking the official packaging.
 """
 
 DEV_SYSTEM_PROMPT = """
@@ -229,6 +230,27 @@ def generate_chat_response(persona, chat_history, user_message, api_key=None, pr
                 context_injection += f"Please respond in the {preferred_language} language."
                 
     system_instruction += context_injection
+
+    # Scan for medicine details to inject as verified context
+    if persona == "🩺 AI Health Consultant":
+        matched_meds_context = []
+        text_to_scan = (user_message + " " + " ".join([m["content"] for m in chat_history[-2:]])).lower()
+        for med in med_database.MEDICINE_DATABASE:
+            base_name = med["name"].split("(")[0].strip().lower()
+            if base_name in text_to_scan or med["name"].lower() in text_to_scan:
+                med_details = (
+                    f"Product: {med['name']}\n"
+                    f"- Generic Name: {med.get('generic_name', 'Not Specified')}\n"
+                    f"- Category: {med.get('category', 'General')}\n"
+                    f"- Country: {med.get('country', 'Unknown')}\n"
+                    f"- Dosage & Directions: {med.get('dosage', 'Not Specified')}\n"
+                    f"- Warnings & Contraindications: {', '.join(med.get('warnings', ['Not Specified']))}\n"
+                    f"- Primary Uses: {', '.join(med.get('uses', ['Not Specified']))}\n"
+                )
+                matched_meds_context.append(med_details)
+        if matched_meds_context:
+            system_instruction += "\n\nRelevant Local Product Database Details for your analysis:\n" + "\n".join(matched_meds_context)
+            system_instruction += "\nCRITICAL: You MUST analyze the specific age limits, dosing, and contraindications in the product details above and only report safety guidelines/age limits that align with them. Do NOT guess or default to saying it is restricted to 15+ unless specified above."
     
     formatted_chat = []
     formatted_chat.append(f"System Instructions: {system_instruction}")
