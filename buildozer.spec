@@ -54,7 +54,7 @@ ios.kivy_ios_branch = master
 
 # (str) python-for-android git clone url and branch
 p4a.url = https://github.com/kivy/python-for-android.git
-p4a.branch = master
+p4a.branch = v2024.01.21
 
 [buildozer]
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
