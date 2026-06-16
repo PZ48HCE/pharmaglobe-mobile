@@ -59,9 +59,9 @@ jobs:
             libtool \
             pkg-config
 
-      - name: Install Buildozer and Cython
+      - name: Upgrade Host Pip and Dependencies
         run: |
-          pip install buildozer cython virtualenv
+          python -m pip install --upgrade pip setuptools wheel virtualenv cython buildozer
 
       - name: Cache Buildozer Global Directory (SDK/NDK)
         uses: actions/cache@v4
