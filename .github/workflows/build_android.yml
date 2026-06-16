@@ -63,15 +63,20 @@ jobs:
         run: |
           pip install buildozer cython virtualenv
 
-      - name: Cache Buildozer Global Directory
+      - name: Cache Buildozer Global Directory (SDK/NDK)
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: ${{ runner.os }}-buildozer-v3-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-buildozer-global-${{ hashFiles('buildozer.spec') }}
+
+      - name: Cache Local Buildozer Directory (Compiled Recipes)
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-buildozer-local-${{ hashFiles('buildozer.spec') }}
 
       - name: Build Android debug APK
         run: |
-          buildozer android clean || true
           buildozer android debug > buildozer.log 2>&1
 
 
