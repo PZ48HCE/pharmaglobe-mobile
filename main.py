@@ -57,8 +57,8 @@ class SmoothScrollEffect(DampedScrollEffect):
     """Custom scroll effect using damped scroll effect for natural rubber-band scrolling on iOS."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.friction = 0.018
-        self.min_velocity = 0.05
+        self.friction = 0.03
+        self.min_velocity = 0.1
 
 from kivy.uix.image import Image
 from kivy.network.urlrequest import UrlRequest
@@ -229,12 +229,10 @@ KV = """
 #:import FlagWidget __main__.FlagWidget
 <ScrollView>:
     effect_cls: SmoothScrollEffect
-    scroll_wheel_distance: dp(40)
-    smooth_scroll_end: 10
+    scroll_wheel_distance: dp(30)
     scroll_type: ['content']
-    bar_width: dp(4)
-    scroll_distance: dp(4)
-    scroll_timeout: 250
+    scroll_distance: dp(12)
+    scroll_timeout: 55
 
 <SafeIconButton@MDCard>:
     icon: ""
