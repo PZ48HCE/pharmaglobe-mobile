@@ -77,6 +77,8 @@ jobs:
 
       - name: Build Android debug APK
         run: |
+          # Clear the cached python-for-android compilation venv to avoid the stale pip resolvelib bug
+          find .buildozer -name "venv" -type d -exec rm -rf {} + || true
           buildozer android debug > buildozer.log 2>&1
 
 

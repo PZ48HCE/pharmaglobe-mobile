@@ -172,6 +172,7 @@ def lookup_barcode_in_databases(barcode):
         "52994180": "Delguard Adhesive Bandage (デルガード 救急絆創膏)",
         "52990148": "Delguard Adhesive Bandage (デルガード 救急絆創膏)",
         "4946842505975": "Asahi Mintia Coldsmash (アサヒ ミンティア コールスマッシュ)",
+        "4902705096028": "Meiji Probio Yogurt R-1 Drink Type (明治プロビオヨーグルトR-1 飲むタイプ)",
     }
     
     target_name = None

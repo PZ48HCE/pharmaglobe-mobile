@@ -914,7 +914,22 @@ MEDICINE_DATABASE = [ { 'benefits': [ 'Highly effective pain relief',
     'uses': ['Travel fatigue', 'Mouth freshening', 'Instant cooling blast', 'Drowsiness relief'],
     'warnings': [ 'Do not swallow whole; let it dissolve slowly.',
                   'Store in a cool, dry place away from direct sunlight.',
-                  'Excessive consumption may have a laxative effect.']}]
+                  'Excessive consumption may have a laxative effect.']},
+  { 'benefits': [ 'Strengthens the immune system',
+                  'Contains OLL1073R-1 lactic acid bacteria',
+                  'Low sugar and low calorie recipe'],
+    'category': 'Supplements',
+    'country': 'Japan',
+    'dosage': 'Drink 1 bottle (112g) daily as part of a balanced diet.',
+    'generic_name': 'Lactobacillus bulgaricus OLL1073R-1',
+    'image_url': 'images/med_59.png',
+    'name': 'Meiji Probio Yogurt R-1 Drink Type (明治プロビオヨーグルトR-1 飲むタイプ)',
+    'price': '¥130 - ¥150 (1 bottle)',
+    'shop_link': 'https://www.meiji.co.jp/dairies/yogurt/probio/r-1/',
+    'uses': ['Immune support', 'Gut health', 'Cold prevention support', 'Digestive health'],
+    'warnings': [ 'Keep refrigerated (below 10°C).',
+                  'Contains dairy (milk). Do not consume if allergic to dairy.',
+                  'Shake well before drinking.']}]
 
 def get_countries():
     """Returns unique list of countries in the database."""
