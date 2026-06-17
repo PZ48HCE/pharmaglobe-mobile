@@ -75,7 +75,15 @@ jobs:
           path: .buildozer
           key: ${{ runner.os }}-buildozer-local-${{ hashFiles('buildozer.spec') }}
 
+      - name: Clone and Patch python-for-android
+        run: |
+          git clone --depth 1 -b master https://github.com/kivy/python-for-android.git python-for-android
+          # Apply the --clear flag patch to fix the pip/resolvelib import error (Issue #3339)
+          sed -i "s/shprint(host_python, '-m', 'venv', 'venv')/shprint(host_python, '-m', 'venv', '--clear', 'venv')/g" python-for-android/pythonforandroid/build.py
+
       - name: Build Android debug APK
+        env:
+          APP_P4A_SOURCE_DIR: ${{ github.workspace }}/python-for-android
         run: |
           # Clear the cached python-for-android compilation venv to avoid the stale pip resolvelib bug
           find .buildozer -name "venv" -type d -exec rm -rf {} + || true

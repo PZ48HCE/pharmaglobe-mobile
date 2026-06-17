@@ -78,5 +78,8 @@ Thumbs.db
 # Ensure buildozer.spec is not ignored by the *.spec rule
 !buildozer.spec
 
+# Ignore local cloned python-for-android
+python-for-android/
+
 
 
