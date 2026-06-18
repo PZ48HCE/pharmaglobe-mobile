@@ -78,14 +78,14 @@ jobs:
       - name: Clone and Patch python-for-android
         run: |
           git clone --depth 1 -b master https://github.com/kivy/python-for-android.git python-for-android
-          python3 -c "
+          python3 << 'EOF'
           with open('python-for-android/pythonforandroid/build.py', 'r') as f:
               code = f.read()
-          code = code.replace(\"shprint(host_python, '-m', 'venv', 'venv')\", \"shprint(host_python, '-m', 'venv', '--clear', 'venv')\")
-          code = code.replace('\"source venv/bin/activate && pip install -U pip\"', '\"source venv/bin/activate && pip --version\"')
+          code = code.replace("shprint(host_python, '-m', 'venv', 'venv')", "shprint(host_python, '-m', 'venv', '--clear', 'venv')")
+          code = code.replace('"source venv/bin/activate && pip install -U pip"', '"source venv/bin/activate && pip --version"')
           with open('python-for-android/pythonforandroid/build.py', 'w') as f:
               f.write(code)
-          "
+          EOF
 
       - name: Build Android debug APK
         env:
