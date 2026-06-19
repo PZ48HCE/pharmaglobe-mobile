@@ -52,9 +52,8 @@ fullscreen = 0
 ios.kivy_ios_url = https://github.com/kivy/kivy-ios
 ios.kivy_ios_branch = master
 
-# (str) python-for-android git clone url and branch
-p4a.url = https://github.com/kivy/python-for-android.git
-p4a.branch = master
+# (str) python-for-android directory to use, or clone url if not set
+p4a.dir = ./python-for-android
 
 [buildozer]
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
