@@ -1,4 +1,3 @@
-genai = None
 import os
 import med_database
 
@@ -6,23 +5,42 @@ import med_database
 def get_env_api_key():
     return os.environ.get("GEMINI_API_KEY", "")
 
+class GeminiRestClient:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def generate_content(self, prompt):
+        import requests
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+        res = requests.post(url, headers=headers, json=payload, timeout=30)
+        if res.status_code == 200:
+            data = res.json()
+            candidates = data.get("candidates", [])
+            if candidates:
+                content = candidates[0].get("content", {})
+                parts = content.get("parts", [])
+                if parts:
+                    text = parts[0].get("text", "")
+                    
+                    class GeminiResponse:
+                        def __init__(self, text_val):
+                            self.text = text_val
+                            
+                    return GeminiResponse(text)
+            raise Exception(f"Empty or invalid response from Gemini API: {data}")
+        else:
+            raise Exception(f"Gemini API returned HTTP {res.status_code}: {res.text}")
+
 def get_gemini_client(api_key=None):
-    """Initializes and returns the generative model if a valid key is provided."""
-    global genai
+    """Initializes and returns the generative model REST client if a valid key is provided."""
     key = api_key or get_env_api_key()
     if not key:
         return None
-    try:
-        if genai is None:
-            import google.generativeai as loaded_genai
-            genai = loaded_genai
-        genai.configure(api_key=key)
-        # Use gemini-2.5-flash as the default standard model
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        return model
-    except (ImportError, Exception) as e:
-        print(f"Error initializing Gemini: {e}")
-        return None
+    return GeminiRestClient(key)
 
 # ==================== PERSONA SYSTEM PROMPTS ====================
 
