@@ -1456,12 +1456,8 @@ ScreenManager:
                                 md_bg_color: 0, 0, 0, 1
                                 radius: [20, 20, 20, 20]
                                 padding: dp(5)
-                                Camera:
-                                    id: scanner_camera
-                                    resolution: (640, 480)
-                                    play: False
-                                    keep_ratio: True
-                                    allow_stretch: True
+                                BoxLayout:
+                                    id: camera_container
 
                             MDBoxLayout:
                                 size_hint_y: 0.4
@@ -2625,11 +2621,10 @@ class PharmaGlobeApp(MDApp):
         self.root.ids.tab_manager.current = tab_name
         
         # Stop camera if leaving scanner, start if entering
-        if hasattr(self.root, "ids") and "scanner_camera" in self.root.ids:
-            if tab_name == "scanner":
-                self.start_camera()
-            else:
-                self.stop_camera()
+        if tab_name == "scanner":
+            self.start_camera()
+        elif hasattr(self.root, "ids") and "scanner_camera" in self.root.ids:
+            self.stop_camera()
                 
         # Trigger dynamic rendering of tabs when active
         if tab_name == "wishlist":
@@ -4084,9 +4079,40 @@ class PharmaGlobeApp(MDApp):
         grid.add_widget(MobileMedicineCard(res))
 
     # ==================== BARCODE SCANNER CONTROLLERS ====================
+    def init_camera_widget(self):
+        """Dynamically instantiates Kivy Camera only on demand to prevent Android permission startup crashes."""
+        if hasattr(self.root, "ids") and "scanner_camera" in self.root.ids:
+            return self.root.ids.scanner_camera
+            
+        from kivy.uix.camera import Camera
+        cam = Camera(
+            resolution=(640, 480),
+            play=False,
+            keep_ratio=True,
+            allow_stretch=True
+        )
+        self.root.ids.camera_container.add_widget(cam)
+        self.root.ids["scanner_camera"] = cam
+        return cam
+
     def start_camera(self):
         """Fires up the camera feed when the user switches to scanner."""
-        self.root.ids.scanner_camera.play = True
+        from kivy.utils import platform
+        if platform == 'android':
+            from android.permissions import request_permissions, Permission
+            request_permissions([Permission.CAMERA])
+            
+        try:
+            cam = self.init_camera_widget()
+            cam.play = True
+        except Exception as e:
+            print(f"[Scanner] Failed to initialize camera: {e}")
+            self.show_dialog(
+                "Camera Permission Required", 
+                "PharmaGlobe requires camera access to scan barcodes. Please enable camera permission in your phone settings."
+            )
+            return
+            
         self.scan_paused = False
         self.is_scanning_frame = False
         
@@ -4097,7 +4123,8 @@ class PharmaGlobeApp(MDApp):
 
     def stop_camera(self):
         """Stops the camera feed and automatic scanning loop."""
-        self.root.ids.scanner_camera.play = False
+        if hasattr(self.root, "ids") and "scanner_camera" in self.root.ids:
+            self.root.ids.scanner_camera.play = False
         if self.auto_scan_event:
             self.auto_scan_event.cancel()
             self.auto_scan_event = None
@@ -4105,6 +4132,9 @@ class PharmaGlobeApp(MDApp):
 
     def auto_scan_tick(self, dt):
         """Tick event that captures the current texture frame and decodes it in the background."""
+        if not hasattr(self.root, "ids") or "scanner_camera" not in self.root.ids:
+            return
+            
         if self.scan_paused or not self.root.ids.scanner_camera.play:
             return
             

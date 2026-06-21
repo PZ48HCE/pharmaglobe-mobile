@@ -13,7 +13,7 @@ package.domain = org.pz48hce
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,json
+source.include_exts = py,png,jpg,kv,atlas,json,otf
 
 # (str) Application versioning
 version = 1.0.0
