@@ -155,6 +155,29 @@ def lookup_barcode_in_databases(barcode):
     barcode_str = str(barcode).strip()
     barcode_clean = barcode_str.lstrip('0')
     
+    # Check for PAYKE coupon barcodes
+    if barcode_str.startswith("PAYKE"):
+        return {
+            "brand_name": "PharmaGlobe Coupon",
+            "name": "PharmaGlobe Loyalty Reward Voucher",
+            "generic_name": "Coupon Code Voucher",
+            "category": "Rewards",
+            "country": "Loyalty Program",
+            "uses": "Discount on medicine purchases at partner pharmacies.",
+            "benefits": [
+                "10% off your next prescription",
+                "Redeemable instantly at cashier counter",
+                "Valid for 30 days from redemption"
+            ],
+            "dosage": "Present barcode to store cashier during checkout.",
+            "warnings": [
+                "Cannot be combined with other offers.",
+                "One-time use only.",
+                "No cash value."
+            ],
+            "resolved_via": "PharmaGlobe Loyalty Coupon Scanner"
+        }
+    
     # 1. Local hardcoded barcode mapping for test medicines
     # Maps common product barcode variants to curated medicine names in med_database.py
     LOCAL_BARCODE_MAP = {

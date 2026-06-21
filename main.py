@@ -2558,10 +2558,10 @@ class PharmaGlobeApp(MDApp):
     dev_chat_history = ListProperty([])
 
     def build(self):
-        # Configure overall themes
-        self.theme_cls.theme_style = "Light"
-        self.theme_cls.primary_palette = "Red"
-        self.theme_cls.accent_palette = "Blue"
+        # Configure overall themes for Black Clover (Amber/Gold primary, Red accent, Dark style)
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Amber"
+        self.theme_cls.accent_palette = "Red"
         
         # Initialize default lists
         self.health_chat_history = [{
@@ -2588,8 +2588,40 @@ class PharmaGlobeApp(MDApp):
         Clock.schedule_once(lambda dt: self.check_connection(), 1)
         Clock.schedule_interval(lambda dt: self.check_connection(), 45)
         
+        # Dynamically apply Black Clover dark theme color mappings on the KV layout string
+        bc_kv = KV
+        # Backgrounds: light-grey/white -> deep midnight black and grimoire charcoal card
+        bc_kv = bc_kv.replace("md_bg_color: 0.96, 0.97, 0.98, 1", "md_bg_color: 0.08, 0.08, 0.1, 1")
+        bc_kv = bc_kv.replace("md_bg_color: 1, 1, 1, 1", "md_bg_color: 0.13, 0.13, 0.15, 1")
+        bc_kv = bc_kv.replace("md_bg_color: 1.0, 1.0, 1.0, 1.0", "md_bg_color: 0.13, 0.13, 0.15, 1.0")
+        bc_kv = bc_kv.replace("md_bg_color: 1, 1, 1, 0.9", "md_bg_color: 0.13, 0.13, 0.15, 0.9")
+        bc_kv = bc_kv.replace("md_bg_color: 0.94, 0.94, 0.96, 1", "md_bg_color: 0.18, 0.18, 0.2, 1")
+        
+        # Primary highlights: Coral -> golden Dawn gold
+        bc_kv = bc_kv.replace("md_bg_color: 1.0, 0.42, 0.36, 1.0", "md_bg_color: 0.85, 0.65, 0.13, 1.0")
+        bc_kv = bc_kv.replace("md_bg_color: 1.0, 0.42, 0.36, 1", "md_bg_color: 0.85, 0.65, 0.13, 1")
+        bc_kv = bc_kv.replace("text_color: 1.0, 0.42, 0.36, 1", "text_color: 0.85, 0.65, 0.13, 1")
+        bc_kv = bc_kv.replace("text_color: 1.0, 0.42, 0.36, 1.0", "text_color: 0.85, 0.65, 0.13, 1.0")
+        bc_kv = bc_kv.replace("md_bg_color: 1.0, 0.42, 0.36, 0.1", "md_bg_color: 0.85, 0.65, 0.13, 0.15")
+        
+        # Dark text colors: Dark grey -> White/light grey
+        bc_kv = bc_kv.replace("text_color: 0.1, 0.1, 0.12, 1", "text_color: 0.95, 0.95, 0.98, 1")
+        bc_kv = bc_kv.replace("text_color_focus: 0.1, 0.1, 0.12, 1", "text_color_focus: 0.95, 0.95, 0.98, 1")
+        bc_kv = bc_kv.replace("text_color: 0.1, 0.1, 0.1, 1", "text_color: 0.95, 0.95, 0.98, 1")
+        bc_kv = bc_kv.replace("text_color: 0.2, 0.2, 0.2, 1", "text_color: 0.9, 0.9, 0.92, 1")
+        bc_kv = bc_kv.replace("text_color: 0.2, 0.2, 0.22, 1", "text_color: 0.9, 0.9, 0.92, 1")
+        
+        # Muted text colors: Medium grey -> Lighter grey
+        bc_kv = bc_kv.replace("text_color: 0.5, 0.55, 0.55, 1", "text_color: 0.65, 0.65, 0.7, 1")
+        bc_kv = bc_kv.replace("text_color: 0.3, 0.3, 0.35, 1", "text_color: 0.75, 0.75, 0.8, 1")
+        bc_kv = bc_kv.replace("text_color: 0.4, 0.4, 0.45, 1", "text_color: 0.7, 0.7, 0.75, 1")
+        
+        # Blue accents: Blue -> Crimson Red for anti-magic
+        bc_kv = bc_kv.replace("md_bg_color: 0.0, 0.55, 1.0, 1", "md_bg_color: 0.76, 0.12, 0.18, 1")
+        bc_kv = bc_kv.replace("text_color: 0.0, 0.55, 1.0, 1", "text_color: 0.76, 0.12, 0.18, 1")
+        
         # Load KV layout
-        return Builder.load_string(KV)
+        return Builder.load_string(bc_kv)
 
     def on_start(self):
         # Build country chips, category chips, and popular searches
