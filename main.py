@@ -232,8 +232,8 @@ KV = """
     effect_cls: SmoothScrollEffect
     scroll_wheel_distance: dp(40)
     scroll_type: ['content']
-    scroll_distance: dp(4)
-    scroll_timeout: 150
+    scroll_distance: dp(5)
+    scroll_timeout: 300
 
 <SafeIconButton@MDCard>:
     icon: ""
@@ -2523,13 +2523,16 @@ class ChatBubble(MDCard):
             font_style="Caption",
             bold=True
         ))
-        self.add_widget(MDLabel(
+        lbl = MDLabel(
             text=text,
             theme_text_color="Custom",
             text_color=text_color,
             font_style="Body2",
             size_hint_y=None
-        ))
+        )
+        lbl.bind(width=lambda inst, val: setattr(inst, 'text_size', (val, None)))
+        lbl.bind(texture_size=lambda inst, size: setattr(inst, 'height', size[1]))
+        self.add_widget(lbl)
         self.bind(minimum_height=self.setter('height'))
 
 
