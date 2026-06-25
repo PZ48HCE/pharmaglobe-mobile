@@ -54,12 +54,174 @@ except Exception as e:
 
 from kivy.effects.dampedscroll import DampedScrollEffect
 class SmoothScrollEffect(DampedScrollEffect):
-    """Custom scroll effect using damped scroll effect for natural rubber-band scrolling on iOS."""
+    """Custom scroll effect using damped scroll effect for snappy, responsive scrolling."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.friction = 0.02
-        self.min_velocity = 0.05
-        self.max_history = 15
+        self.friction = 0.05
+        self.min_velocity = 0.5
+        self.max_history = 5
+
+from kivy.uix.scrollview import ScrollView
+from kivy.metrics import dp
+import weakref
+
+class ResponsiveScrollView(ScrollView):
+    """
+    A custom ScrollView that intercepts drags instantly for a super snappy feel.
+    Ripples/clicks on child cards/buttons are immediate, and dragging starting from
+    anywhere (including text labels) will scroll without any blocking or lag.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.scroll_timeout = 250
+        self.scroll_distance = dp(10)
+        
+    def on_touch_down(self, touch):
+        if not self.collide_point(*touch.pos):
+            return False
+            
+        # Let Kivy's default mouse wheel scroll behavior handle scroll wheel events
+        if 'button' in touch.profile and touch.button.startswith('scroll'):
+            return super().on_touch_down(touch)
+            
+        if not self.children:
+            return super().on_touch_down(touch)
+            
+        # We track this touch
+        self._touch = touch
+        touch.grab(self)
+        
+        # Save start coordinates and scrolling state
+        touch.ud[f'sv_start_pos_{id(self)}'] = touch.pos
+        touch.ud[f'sv_is_scrolling_{id(self)}'] = False
+        
+        # Propagate touch down to children immediately for instant press states/ripples
+        touch.push()
+        touch.apply_transform_2d(self.to_local)
+        child_handled = False
+        for child in reversed(self.children):
+            if child.dispatch('on_touch_down', touch):
+                child_handled = True
+                break
+        touch.pop()
+        
+        # Find which child widget grabbed the touch (if any)
+        grabbed_child = None
+        if len(touch.grab_list) > 1:
+            for item in reversed(touch.grab_list):
+                try:
+                    w = item() if callable(item) else item
+                    if w and w is not self:
+                        grabbed_child = w
+                        break
+                except Exception:
+                    pass
+        touch.ud[f'sv_grabbed_child_{id(self)}'] = grabbed_child
+        
+        # Initialize scroll effects
+        self._update_effect_bounds()
+        if self.do_scroll_x and self.effect_x:
+            self._effect_x_start_width = self.width
+            self.effect_x.start(touch.x)
+        if self.do_scroll_y and self.effect_y:
+            self._effect_y_start_height = self.height
+            self.effect_y.start(touch.y)
+            
+        return True
+
+    def on_touch_move(self, touch):
+        if touch.grab_current is self or (f'sv_start_pos_{id(self)}' in touch.ud):
+            start_pos = touch.ud.get(f'sv_start_pos_{id(self)}')
+            if not start_pos:
+                return super().on_touch_move(touch)
+                
+            is_scrolling = touch.ud.get(f'sv_is_scrolling_{id(self)}', False)
+            
+            if not is_scrolling:
+                dx = abs(touch.x - start_pos[0])
+                dy = abs(touch.y - start_pos[1])
+                
+                # Check if drag distance exceeds threshold
+                if (self.do_scroll_x and dx > self.scroll_distance) or (self.do_scroll_y and dy > self.scroll_distance):
+                    is_scrolling = True
+                    touch.ud[f'sv_is_scrolling_{id(self)}'] = True
+                    
+                    # Intercept the touch! Ungrab the child widget
+                    grabbed_child = touch.ud.get(f'sv_grabbed_child_{id(self)}')
+                    if grabbed_child:
+                        try:
+                            touch.ungrab(grabbed_child)
+                        except Exception:
+                            pass
+                            
+                        # Cancel pressed/ripple states of the child and its parent hierarchies
+                        curr = grabbed_child
+                        while curr and curr is not self:
+                            if hasattr(curr, 'state'):
+                                curr.state = 'normal'
+                            if hasattr(curr, 'cancel_ripple'):
+                                curr.cancel_ripple()
+                            curr = curr.parent
+                            
+                    # Force grab to ourselves
+                    touch.grab_current = self
+            
+            if is_scrolling:
+                # Update scroll effects directly
+                if self.do_scroll_x and self.effect_x:
+                    self.effect_x.update(touch.x)
+                if self.do_scroll_y and self.effect_y:
+                    self.effect_y.update(touch.y)
+                return True
+            else:
+                # Send touch move to children normally
+                if self.children:
+                    touch.push()
+                    touch.apply_transform_2d(self.to_local)
+                    for child in reversed(self.children):
+                        child.dispatch('on_touch_move', touch)
+                    touch.pop()
+                return True
+                
+        return super().on_touch_move(touch)
+
+    def on_touch_up(self, touch):
+        if touch.grab_current is self or (f'sv_start_pos_{id(self)}' in touch.ud):
+            is_scrolling = touch.ud.get(f'sv_is_scrolling_{id(self)}', False)
+            
+            # Stop scroll effects
+            if self.do_scroll_x and self.effect_x:
+                self.effect_x.stop(touch.x)
+            if self.do_scroll_y and self.effect_y:
+                self.effect_y.stop(touch.y)
+                
+            # Release our own grab
+            touch.ungrab(self)
+            self._touch = None
+            
+            if not is_scrolling:
+                # Tap! Propagate touch up to children
+                if self.children:
+                    touch.push()
+                    touch.apply_transform_2d(self.to_local)
+                    grabbed_child = touch.ud.get(f'sv_grabbed_child_{id(self)}')
+                    if grabbed_child:
+                        try:
+                            grabbed_child.dispatch('on_touch_up', touch)
+                        except Exception:
+                            pass
+                    else:
+                        for child in reversed(self.children):
+                            child.dispatch('on_touch_up', touch)
+                    touch.pop()
+                
+            return True
+            
+        return super().on_touch_up(touch)
+
+from kivy.factory import Factory
+Factory.register('ResponsiveScrollView', cls=ResponsiveScrollView)
+
 
 from kivy.uix.image import Image
 from kivy.network.urlrequest import UrlRequest
@@ -228,12 +390,12 @@ Factory.register('FlagWidget', cls=FlagWidget)
 KV = """
 #:import SmoothScrollEffect __main__.SmoothScrollEffect
 #:import FlagWidget __main__.FlagWidget
-<ScrollView>:
+<ResponsiveScrollView>:
     effect_cls: SmoothScrollEffect
     scroll_wheel_distance: dp(40)
     scroll_type: ['content']
     scroll_distance: dp(5)
-    scroll_timeout: 300
+    scroll_timeout: 1000
 
 <SafeIconButton@MDCard>:
     icon: ""
@@ -276,7 +438,7 @@ ScreenManager:
                         pos: dp(200), dp(-100)
                         size: dp(400), dp(400)
 
-            ScrollView:
+            ResponsiveScrollView:
                 do_scroll_x: False
                 do_scroll_y: True
                 pos_hint: {"center_x": 0.5, "center_y": 0.5}
@@ -593,7 +755,7 @@ ScreenManager:
                         pos: dp(200), dp(-100)
                         size: dp(400), dp(400)
 
-            ScrollView:
+            ResponsiveScrollView:
                 do_scroll_x: False
                 do_scroll_y: True
                 pos_hint: {"center_x": 0.5, "center_y": 0.5}
@@ -873,7 +1035,7 @@ ScreenManager:
                                         pos_hint: {"center_x": 0.5, "center_y": 0.5}
                                         halign: "center"
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 id: home_scroll
                                 do_scroll_x: False
                                 MDBoxLayout:
@@ -1259,7 +1421,7 @@ ScreenManager:
                                     icon: "bell-outline"
                                     on_release: app.show_dialog("Notifications", "No notifications.")
                             
-                            ScrollView:
+                            ResponsiveScrollView:
                                 MDGridLayout:
                                     id: wishlist_grid
                                     cols: 1
@@ -1288,7 +1450,7 @@ ScreenManager:
                                     icon: "bell-outline"
                                     on_release: app.show_dialog("Notifications", "No notifications.")
                             
-                            ScrollView:
+                            ResponsiveScrollView:
                                 MDGridLayout:
                                     id: articles_grid
                                     cols: 1
@@ -1317,7 +1479,7 @@ ScreenManager:
                                     icon: "bell-outline"
                                     on_release: app.show_dialog("Notifications", "No notifications.")
                             
-                            ScrollView:
+                            ResponsiveScrollView:
                                 MDGridLayout:
                                     id: coupons_grid
                                     cols: 1
@@ -1394,7 +1556,7 @@ ScreenManager:
                                 height: dp(46)
                                 orientation: 'vertical'
                                 spacing: dp(2)
-                                ScrollView:
+                                ResponsiveScrollView:
                                     do_scroll_y: False
                                     MDBoxLayout:
                                         id: popular_search_chips
@@ -1403,7 +1565,7 @@ ScreenManager:
                                         spacing: dp(8)
                                         padding: [dp(2), 0, dp(2), 0]
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 do_scroll_y: False
                                 size_hint_y: None
                                 height: dp(44)
@@ -1414,7 +1576,7 @@ ScreenManager:
                                     spacing: dp(8)
                                     padding: [dp(2), 0, dp(2), 0]
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 do_scroll_y: False
                                 size_hint_y: None
                                 height: dp(44)
@@ -1425,7 +1587,7 @@ ScreenManager:
                                     spacing: dp(8)
                                     padding: [dp(2), 0, dp(2), 0]
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 MDGridLayout:
                                     id: search_grid
                                     cols: 1
@@ -1526,7 +1688,7 @@ ScreenManager:
                                     icon: "bell-outline"
                                     on_release: app.show_dialog("Notifications", "No notifications.")
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 do_scroll_x: False
                                 MDBoxLayout:
                                     orientation: 'vertical'
@@ -1755,7 +1917,7 @@ ScreenManager:
                                     size_hint_x: 0.2
                                     on_release: app.clear_chat()
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 id: chat_scroll
                                 MDGridLayout:
                                     id: chat_grid
@@ -1813,7 +1975,7 @@ ScreenManager:
                                     icon: "bell-outline"
                                     on_release: app.show_dialog("Notifications", "No notifications.")
                             
-                            ScrollView:
+                            ResponsiveScrollView:
                                 size_hint_y: None
                                 height: dp(46)
                                 do_scroll_y: False
@@ -1824,7 +1986,7 @@ ScreenManager:
                                     spacing: dp(8)
                                     padding: [dp(12), 0, dp(12), 0]
 
-                            ScrollView:
+                            ResponsiveScrollView:
                                 MDGridLayout:
                                     id: ranking_grid
                                     cols: 1
@@ -2006,7 +2168,7 @@ ScreenManager:
                 specific_text_color: 1.0, 0.42, 0.36, 1
                 left_action_items: [["arrow-left", lambda x: app.go_back_to_main()]]
 
-            ScrollView:
+            ResponsiveScrollView:
                 do_scroll_x: False
                 MDBoxLayout:
                     orientation: 'vertical'
@@ -2069,7 +2231,7 @@ ScreenManager:
                             height: self.texture_size[1]
 
                         # Language Translator Chips Row
-                        ScrollView:
+                        ResponsiveScrollView:
                             size_hint_y: None
                             height: dp(38)
                             do_scroll_y: False
@@ -2092,7 +2254,35 @@ ScreenManager:
 """
 
 # ==================== HELPER LAYOUT CLASSES ====================
-class CountryChip(MDCard):
+class NonBlockingCard(MDCard):
+    """MDCard subclass that does not block ScrollView scrolling when dragged."""
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            touch.ud[f'nb_card_touch_{id(self)}'] = touch.pos
+        return super().on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        key = f'nb_card_touch_{id(self)}'
+        if key in touch.ud:
+            down_pos = touch.ud[key]
+            if abs(touch.x - down_pos[0]) > dp(8) or abs(touch.y - down_pos[1]) > dp(8):
+                if touch.grab_current is self:
+                    touch.ungrab(self)
+                return False
+        return super().on_touch_move(touch)
+
+    def on_touch_up(self, touch):
+        key = f'nb_card_touch_{id(self)}'
+        if key in touch.ud:
+            down_pos = touch.ud[key]
+            if abs(touch.x - down_pos[0]) > dp(8) or abs(touch.y - down_pos[1]) > dp(8):
+                if touch.grab_current is self:
+                    touch.ungrab(self)
+                return True
+        return super().on_touch_up(touch)
+
+
+class CountryChip(NonBlockingCard):
     """Custom chip widget for Location filtering."""
     def __init__(self, text, active=False, on_select=None, **kwargs):
         super().__init__(**kwargs)
@@ -2122,31 +2312,21 @@ class CountryChip(MDCard):
         self.add_widget(self.label_widget)
         self.update_ui()
         self.bind(on_release=lambda x: self.trigger_select())
-        
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            touch.ud['chip_touch_down'] = touch.pos
-        return super().on_touch_down(touch)
-
-    def on_touch_up(self, touch):
-        if 'chip_touch_down' in touch.ud:
-            down_pos = touch.ud['chip_touch_down']
-            if abs(touch.x - down_pos[0]) > dp(10) or abs(touch.y - down_pos[1]) > dp(10):
-                if touch.grab_current is self:
-                    touch.ungrab(self)
-                return True
-        return super().on_touch_up(touch)
 
     def update_ui(self):
+        app = MDApp.get_running_app()
+        is_dark = (app.theme_cls.theme_style == "Dark")
+        active_color = (0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0)
+        
         if self.active:
-            self.md_bg_color = (1.0, 0.42, 0.36, 1.0)  # Coral active
-            self.line_color = (1.0, 0.42, 0.36, 1.0)
+            self.md_bg_color = active_color
+            self.line_color = active_color
             self.label_widget.text_color = (1, 1, 1, 1)
             self.label_widget.theme_text_color = "Custom"
         else:
-            self.md_bg_color = (0.9, 0.92, 0.94, 0.6)  # light grey inactive
-            self.line_color = (0.85, 0.87, 0.9, 0.4)
-            self.label_widget.text_color = (0.35, 0.38, 0.42, 1.0)
+            self.md_bg_color = (0.18, 0.18, 0.2, 0.6) if is_dark else (0.9, 0.92, 0.94, 0.6)
+            self.line_color = (0.25, 0.25, 0.28, 0.4) if is_dark else (0.85, 0.87, 0.9, 0.4)
+            self.label_widget.text_color = (0.75, 0.75, 0.8, 1.0) if is_dark else (0.35, 0.38, 0.42, 1.0)
             self.label_widget.theme_text_color = "Custom"
             
     def trigger_select(self):
@@ -2154,7 +2334,7 @@ class CountryChip(MDCard):
             self.on_select(self.text)
 
 
-class CategoryChip(MDCard):
+class CategoryChip(NonBlockingCard):
     """Custom chip widget with icon for Category filtering."""
     def __init__(self, text, icon_name, active=False, on_select=None, **kwargs):
         super().__init__(**kwargs)
@@ -2196,35 +2376,25 @@ class CategoryChip(MDCard):
         self.add_widget(self.label_widget)
         self.update_ui()
         self.bind(on_release=lambda x: self.trigger_select())
-        
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            touch.ud['chip_touch_down'] = touch.pos
-        return super().on_touch_down(touch)
-
-    def on_touch_up(self, touch):
-        if 'chip_touch_down' in touch.ud:
-            down_pos = touch.ud['chip_touch_down']
-            if abs(touch.x - down_pos[0]) > dp(10) or abs(touch.y - down_pos[1]) > dp(10):
-                if touch.grab_current is self:
-                    touch.ungrab(self)
-                return True
-        return super().on_touch_up(touch)
 
     def update_ui(self):
+        app = MDApp.get_running_app()
+        is_dark = (app.theme_cls.theme_style == "Dark")
+        active_color = (0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0)
+        
         if self.active:
-            self.md_bg_color = (1.0, 0.42, 0.36, 1.0)  # Coral active
-            self.line_color = (1.0, 0.42, 0.36, 1.0)
+            self.md_bg_color = active_color
+            self.line_color = active_color
             self.icon_widget.text_color = (1, 1, 1, 1)
             self.icon_widget.theme_text_color = "Custom"
             self.label_widget.text_color = (1, 1, 1, 1)
             self.label_widget.theme_text_color = "Custom"
         else:
-            self.md_bg_color = (0.9, 0.92, 0.94, 0.6)  # light grey inactive
-            self.line_color = (0.85, 0.87, 0.9, 0.4)
-            self.icon_widget.text_color = (0.35, 0.38, 0.42, 1.0)
+            self.md_bg_color = (0.18, 0.18, 0.2, 0.6) if is_dark else (0.9, 0.92, 0.94, 0.6)
+            self.line_color = (0.25, 0.25, 0.28, 0.4) if is_dark else (0.85, 0.87, 0.9, 0.4)
+            self.icon_widget.text_color = (0.75, 0.75, 0.8, 1.0) if is_dark else (0.35, 0.38, 0.42, 1.0)
             self.icon_widget.theme_text_color = "Custom"
-            self.label_widget.text_color = (0.35, 0.38, 0.42, 1.0)
+            self.label_widget.text_color = (0.75, 0.75, 0.8, 1.0) if is_dark else (0.35, 0.38, 0.42, 1.0)
             self.label_widget.theme_text_color = "Custom"
             
     def trigger_select(self):
@@ -2232,7 +2402,7 @@ class CategoryChip(MDCard):
             self.on_select(self.text)
 
 
-class MobileMedicineCard(MDCard):
+class MobileMedicineCard(NonBlockingCard):
     """Custom card widget for displaying medication summaries with rating stars and medals."""
     def __init__(self, med, rank=None, **kwargs):
         super().__init__(**kwargs)
@@ -2242,8 +2412,12 @@ class MobileMedicineCard(MDCard):
         self.size_hint_y = None
         self.height = dp(140)
         self.radius = [dp(16), dp(16), dp(16), dp(16)]
-        self.md_bg_color = (1.0, 1.0, 1.0, 1.0)  # Pure white card
-        self.line_color = (0.9, 0.91, 0.94, 1.0)  # light grey border
+        
+        app = MDApp.get_running_app()
+        is_dark = (app.theme_cls.theme_style == "Dark")
+        
+        self.md_bg_color = (0.13, 0.13, 0.15, 1) if is_dark else (1.0, 1.0, 1.0, 1.0)
+        self.line_color = (0.2, 0.2, 0.22, 1) if is_dark else (0.9, 0.91, 0.94, 1.0)
         self.line_width = 1
         self.ripple_behavior = True
         
@@ -2280,12 +2454,16 @@ class MobileMedicineCard(MDCard):
             elif "allergy" in cat_lower:
                 icon_name = "flower"
                 
+            primary_color = (0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0)
+            primary_bg = (0.85, 0.65, 0.13, 0.15) if is_dark else (1.0, 0.42, 0.36, 0.1)
+            primary_line = (0.85, 0.65, 0.13, 0.25) if is_dark else (1.0, 0.42, 0.36, 0.2)
+            
             icon_card = MDCard(
                 size_hint=(None, None),
                 size=(68, 68),
                 radius=[20, 20, 20, 20],
-                md_bg_color=(1.0, 0.42, 0.36, 0.1),  # soft coral circle
-                line_color=(1.0, 0.42, 0.36, 0.2),
+                md_bg_color=primary_bg,
+                line_color=primary_line,
                 line_width=1,
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 elevation=0
@@ -2294,7 +2472,7 @@ class MobileMedicineCard(MDCard):
             icon_widget = MDIcon(
                 icon=icon_name,
                 theme_text_color="Custom",
-                text_color=(1.0, 0.42, 0.36, 1.0),
+                text_color=primary_color,
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 halign="center",
                 font_size="24sp"
@@ -2357,10 +2535,13 @@ class MobileMedicineCard(MDCard):
                 instance.text_size = (val, None)
         
         header_text = f"{country.upper()}   |   {cat.upper()}" if country else cat.upper()
+        primary_color = (0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0)
+        text_primary = (0.95, 0.95, 0.98, 1.0) if is_dark else (0.1, 0.1, 0.12, 1.0)
+        
         lbl_header = MDLabel(
             text=header_text,
             theme_text_color="Custom",
-            text_color=(1.0, 0.42, 0.36, 1.0),
+            text_color=primary_color,
             font_style="Caption",
             bold=True,
             size_hint_y=None,
@@ -2371,7 +2552,7 @@ class MobileMedicineCard(MDCard):
         lbl_name = MDLabel(
             text=name,
             theme_text_color="Custom",
-            text_color=(0.1, 0.1, 0.12, 1.0),
+            text_color=text_primary,
             font_style="Subtitle1",
             bold=True,
             adaptive_height=True
@@ -2404,12 +2585,15 @@ class MobileMedicineCard(MDCard):
                 size=(12, 12),
                 pos_hint={"center_y": 0.5}
             ))
+            
+        text_muted = (0.65, 0.65, 0.7, 1.0) if is_dark else (0.5, 0.55, 0.55, 1.0)
+        
         stars_layout.add_widget(MDLabel(
             text=f"{rating} ({rating_count})",
             font_style="Caption",
             font_size="10sp",
             theme_text_color="Custom",
-            text_color=(0.5, 0.55, 0.55, 1.0),
+            text_color=text_muted,
             valign="middle",
             halign="left",
             size_hint=(None, None),
@@ -2420,7 +2604,7 @@ class MobileMedicineCard(MDCard):
         lbl_generic = MDLabel(
             text=f"Active: {generic}",
             theme_text_color="Custom",
-            text_color=(0.5, 0.55, 0.55, 1.0),
+            text_color=text_muted,
             font_style="Caption",
             italic=True,
             adaptive_height=True
@@ -2431,7 +2615,7 @@ class MobileMedicineCard(MDCard):
         lbl_price = MDLabel(
             text=f"Price: {price}",
             theme_text_color="Custom",
-            text_color=(0.1, 0.1, 0.12, 1.0),
+            text_color=text_primary,
             font_style="Caption",
             adaptive_height=True
         )
@@ -2453,7 +2637,7 @@ class MobileMedicineCard(MDCard):
         is_saved = name in MDApp.get_running_app().saved_items
         bookmark_btn = Factory.SafeIconButton(
             icon="bookmark" if is_saved else "bookmark-outline",
-            icon_color=(1.0, 0.42, 0.36, 1.0) if is_saved else (0.6, 0.65, 0.7, 1.0),
+            icon_color=primary_color if is_saved else (0.6, 0.65, 0.7, 1.0),
             size_hint=(None, None),
             size=(dp(28), dp(28)),
             radius=[dp(6), dp(6), dp(6), dp(6)],
@@ -2477,23 +2661,9 @@ class MobileMedicineCard(MDCard):
     def trigger_wishlist(self, med):
         MDApp.get_running_app().toggle_wishlist(med)
 
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            touch.ud['card_touch_down'] = touch.pos
-        return super().on_touch_down(touch)
 
-    def on_touch_up(self, touch):
-        if 'card_touch_down' in touch.ud:
-            down_pos = touch.ud['card_touch_down']
-            if abs(touch.x - down_pos[0]) > dp(10) or abs(touch.y - down_pos[1]) > dp(10):
-                if touch.grab_current is self:
-                    touch.ungrab(self)
-                return True
-        return super().on_touch_up(touch)
-
-
-class ChatBubble(MDCard):
-    """Custom speech bubble card for AI Chat messaging in light theme."""
+class ChatBubble(NonBlockingCard):
+    """Custom speech bubble card for AI Chat messaging in theme-aware styling."""
     def __init__(self, sender, text, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
@@ -2503,17 +2673,31 @@ class ChatBubble(MDCard):
         self.radius = [12, 12, 12, 12]
         self.elevation = 0
         
+        # Check active theme style
+        app = MDApp.get_running_app()
+        is_dark = (app.theme_cls.theme_style == "Dark")
+        
         if sender == "user":
-            self.md_bg_color = (1.0, 0.42, 0.36, 1.0)  # Coral background
+            if is_dark:
+                self.md_bg_color = (0.76, 0.12, 0.18, 1.0)  # Crimson Red
+                label_color = (1.0, 0.8, 0.8, 0.9)
+                text_color = (1.0, 1.0, 1.0, 1.0)
+            else:
+                self.md_bg_color = (1.0, 0.42, 0.36, 1.0)  # Coral
+                label_color = (1.0, 1.0, 1.0, 0.8)
+                text_color = (1.0, 1.0, 1.0, 1.0)
             self.pos_hint = {"right": 0.98}
-            label_color = (1.0, 1.0, 1.0, 0.8)
-            text_color = (1.0, 1.0, 1.0, 1.0)
             sender_name = "You"
         else:
-            self.md_bg_color = (0.9, 0.92, 0.94, 1.0)  # light grey background
+            if is_dark:
+                self.md_bg_color = (0.18, 0.18, 0.2, 1.0)  # Dark charcoal
+                label_color = (0.85, 0.65, 0.13, 1.0)      # Golden Amber
+                text_color = (0.95, 0.95, 0.98, 1.0)
+            else:
+                self.md_bg_color = (0.9, 0.92, 0.94, 1.0)  # Light grey
+                label_color = (1.0, 0.42, 0.36, 1.0)
+                text_color = (0.1, 0.1, 0.12, 1.0)
             self.pos_hint = {"left": 0.02}
-            label_color = (1.0, 0.42, 0.36, 1.0)
-            text_color = (0.1, 0.1, 0.12, 1.0)
             sender_name = "PharmaGlobe Assistant"
             
         self.add_widget(MDLabel(
@@ -2754,16 +2938,17 @@ class PharmaGlobeApp(MDApp):
             }
         ]
         
+        is_dark = (self.theme_cls.theme_style == "Dark")
         for art in articles:
-            card = MDCard(
+            card = NonBlockingCard(
                 orientation='horizontal',
                 size_hint_y=None,
                 height=dp(80),
                 radius=[12, 12, 12, 12],
                 padding=dp(12),
                 spacing=dp(12),
-                md_bg_color=(1, 1, 1, 1),
-                line_color=(0.9, 0.91, 0.94, 1.0),
+                md_bg_color=(0.13, 0.13, 0.15, 1) if is_dark else (1, 1, 1, 1),
+                line_color=(0.2, 0.2, 0.22, 1) if is_dark else (0.9, 0.91, 0.94, 1.0),
                 line_width=1,
                 ripple_behavior=True,
                 on_release=lambda x, a=art: self.show_dialog(a["title"], a["content"])
@@ -2773,14 +2958,14 @@ class PharmaGlobeApp(MDApp):
                 size_hint=(None, None),
                 size=(dp(44), dp(44)),
                 radius=[dp(12)],
-                md_bg_color=(1.0, 0.42, 0.36, 0.1),
+                md_bg_color=(0.85, 0.65, 0.13, 0.15) if is_dark else (1.0, 0.42, 0.36, 0.1),
                 pos_hint={"center_y": 0.5},
                 elevation=0
             )
             icon_box.add_widget(MDIcon(
                 icon=art["icon"],
                 theme_text_color="Custom",
-                text_color=(1.0, 0.42, 0.36, 1),
+                text_color=(0.85, 0.65, 0.13, 1) if is_dark else (1.0, 0.42, 0.36, 1),
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
                 halign="center"
             ))
@@ -2791,7 +2976,7 @@ class PharmaGlobeApp(MDApp):
                 font_style="Subtitle2",
                 bold=True,
                 theme_text_color="Custom",
-                text_color=(0.1, 0.1, 0.12, 1)
+                text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1)
             ))
             text_box.add_widget(MDLabel(
                 text=art["time"],
@@ -2802,7 +2987,7 @@ class PharmaGlobeApp(MDApp):
             chevron = MDIcon(
                 icon="chevron-right",
                 theme_text_color="Custom",
-                text_color=(0.7, 0.7, 0.7, 1),
+                text_color=(0.85, 0.65, 0.13, 1) if is_dark else (0.7, 0.7, 0.7, 1),
                 pos_hint={"center_y": 0.5},
                 size_hint_x=None,
                 width=dp(24)
@@ -2827,16 +3012,17 @@ class PharmaGlobeApp(MDApp):
             {"name": "Starbucks Gift Card (Y500)", "points": 500, "desc": "Get a 500 Yen e-gift card for Starbucks locations."}
         ]
         
+        is_dark = (self.theme_cls.theme_style == "Dark")
         for cp in coupons:
-            card = MDCard(
+            card = NonBlockingCard(
                 orientation='vertical',
                 size_hint_y=None,
                 height=dp(110),
                 radius=[12, 12, 12, 12],
                 padding=dp(12),
                 spacing=dp(6),
-                md_bg_color=(1, 1, 1, 1),
-                line_color=(0.9, 0.91, 0.94, 1.0),
+                md_bg_color=(0.13, 0.13, 0.15, 1) if is_dark else (1, 1, 1, 1),
+                line_color=(0.2, 0.2, 0.22, 1) if is_dark else (0.9, 0.91, 0.94, 1.0),
                 line_width=1,
                 elevation=1
             )
@@ -2847,14 +3033,14 @@ class PharmaGlobeApp(MDApp):
                 font_style="Subtitle2",
                 bold=True,
                 theme_text_color="Custom",
-                text_color=(0.1, 0.1, 0.12, 1)
+                text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1)
             ))
             
             points_badge = MDCard(
                 size_hint=(None, None),
                 size=(dp(70), dp(20)),
                 radius=[dp(8)],
-                md_bg_color=(0.93, 0.96, 1.0, 1),
+                md_bg_color=(0.76, 0.12, 0.18, 0.15) if is_dark else (0.93, 0.96, 1.0, 1),
                 pos_hint={"center_y": 0.5},
                 elevation=0
             )
@@ -2864,7 +3050,7 @@ class PharmaGlobeApp(MDApp):
                 bold=True,
                 halign="center",
                 theme_text_color="Custom",
-                text_color=(0.0, 0.55, 1.0, 1)
+                text_color=(0.76, 0.12, 0.18, 1) if is_dark else (0.0, 0.55, 1.0, 1)
             ))
             header.add_widget(points_badge)
             
@@ -2878,7 +3064,7 @@ class PharmaGlobeApp(MDApp):
             
             btn = MDRaisedButton(
                 text="Redeem Voucher",
-                md_bg_color=(1.0, 0.42, 0.36, 1.0),
+                md_bg_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0),
                 text_color=(1, 1, 1, 1),
                 size_hint_y=None,
                 height=dp(28),
@@ -2898,6 +3084,8 @@ class PharmaGlobeApp(MDApp):
             import random
             barcode = f"PAYKE-{random.randint(1000, 9999)}-{random.randint(10, 99)}"
             
+            is_dark = (self.theme_cls.theme_style == "Dark")
+            
             box = MDBoxLayout(orientation='vertical', spacing=dp(10), size_hint_y=None, height=dp(120))
             box.add_widget(MDLabel(
                 text="Show this barcode at the store cashier to redeem your coupon:",
@@ -2911,14 +3099,14 @@ class PharmaGlobeApp(MDApp):
                 font_style="H5",
                 bold=True,
                 theme_text_color="Custom",
-                text_color=(1.0, 0.42, 0.36, 1.0)
+                text_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0)
             ))
             box.add_widget(MDLabel(
                 text="||||| | ||| |||| | || |||| | ||",
                 halign="center",
                 font_style="H4",
                 theme_text_color="Custom",
-                text_color=(0.1, 0.1, 0.12, 1)
+                text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1)
             ))
             
             dialog = MDDialog(
@@ -2927,7 +3115,7 @@ class PharmaGlobeApp(MDApp):
                 content_cls=box,
                 buttons=[MDRaisedButton(
                     text="Done",
-                    md_bg_color=(1.0, 0.42, 0.36, 1.0),
+                    md_bg_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0),
                     text_color=(1, 1, 1, 1),
                     on_release=lambda x: dialog.dismiss()
                 )]
@@ -4638,6 +4826,8 @@ class PharmaGlobeApp(MDApp):
             if "image_url" in self.current_med and self.current_med["image_url"]:
                 med["image_url"] = self.current_med["image_url"]
 
+        is_dark = (self.theme_cls.theme_style == "Dark")
+
         # 1. Update basic text labels
         self.root.ids.details_title.text = med.get("name", "Unknown Medicine")
         self.root.ids.details_subtitle.text = f"Active: {med.get('generic_name', med.get('active_ingredients', 'Not Specified'))}"
@@ -4677,27 +4867,36 @@ class PharmaGlobeApp(MDApp):
                 return
                 
             # Create a horizontal card container
-            card = MDCard(
+            card = NonBlockingCard(
                 orientation='horizontal',
                 size_hint_y=None,
                 padding=[0, 0, 14, 0], # flush left edge
                 spacing=12,
                 radius=[12, 12, 12, 12],
-                md_bg_color=(1, 1, 1, 1), # Light white card
-                line_color=(0.9, 0.91, 0.94, 1), # Light gray border
+                md_bg_color=(0.13, 0.13, 0.15, 1) if is_dark else (1, 1, 1, 1),
+                line_color=(0.2, 0.2, 0.22, 1) if is_dark else (0.9, 0.91, 0.94, 1),
                 elevation=1
             )
             card.bind(minimum_height=card.setter('height'))
             
-            # Map sections to distinct neon colors
-            color_map = {
-                "primary indications & uses": (1.0, 0.42, 0.36, 1.0), # Coral
-                "key benefits": (0.1, 0.45, 0.85, 1.0), # Blue
-                "dosage & directions": (1.0, 0.6, 0.2, 1), # Amber
-                "precautions": (0.15, 0.65, 0.3, 1), # Green
-                "online registry summary": (0.1, 0.45, 0.85, 1.0) # Blue
-            }
-            accent_color = color_map.get(title.lower(), (1.0, 0.42, 0.36, 1.0))
+            # Map sections to distinct theme colors
+            if is_dark:
+                color_map = {
+                    "primary indications & uses": (0.85, 0.65, 0.13, 1.0), # Gold
+                    "key benefits": (0.76, 0.12, 0.18, 1.0),               # Crimson
+                    "dosage & directions": (0.85, 0.65, 0.13, 1.0),        # Gold
+                    "precautions": (0.76, 0.12, 0.18, 1.0),               # Crimson
+                    "online registry summary": (0.85, 0.65, 0.13, 1.0)     # Gold
+                }
+            else:
+                color_map = {
+                    "primary indications & uses": (1.0, 0.42, 0.36, 1.0), # Coral
+                    "key benefits": (0.1, 0.45, 0.85, 1.0), # Blue
+                    "dosage & directions": (1.0, 0.6, 0.2, 1), # Amber
+                    "precautions": (0.15, 0.65, 0.3, 1), # Green
+                    "online registry summary": (0.1, 0.45, 0.85, 1.0) # Blue
+                }
+            accent_color = color_map.get(title.lower(), (0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0))
             
             accent_bar = MDBoxLayout(
                 size_hint=(None, 1),
@@ -4751,7 +4950,7 @@ class PharmaGlobeApp(MDApp):
                 text=content,
                 font_style="Body2",
                 theme_text_color="Custom",
-                text_color=(0.1, 0.1, 0.12, 1), # Dark slate text
+                text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1),
                 markup=True,
                 size_hint_y=None
             )
@@ -4778,14 +4977,14 @@ class PharmaGlobeApp(MDApp):
                 warnings = "\n".join([f"* {w}" for w in warnings if w.strip()])
             warnings = str(warnings).strip()
             if warnings.lower() not in ["", "none listed.", "not specified"]:
-                warn_card = MDCard(
+                warn_card = NonBlockingCard(
                     orientation='horizontal',
                     size_hint_y=None,
                     padding=[0, 0, 14, 0],
                     spacing=12,
                     radius=[12, 12, 12, 12],
-                    md_bg_color=(1.0, 0.94, 0.94, 1.0), # soft red tint
-                    line_color=(0.95, 0.8, 0.8, 1), # soft red border
+                    md_bg_color=(0.22, 0.1, 0.1, 1.0) if is_dark else (1.0, 0.94, 0.94, 1.0),
+                    line_color=(0.5, 0.2, 0.2, 1) if is_dark else (0.95, 0.8, 0.8, 1),
                     elevation=1
                 )
                 warn_card.bind(minimum_height=warn_card.setter('height'))
@@ -4841,7 +5040,7 @@ class PharmaGlobeApp(MDApp):
                     text=warnings,
                     font_style="Body2",
                     theme_text_color="Custom",
-                    text_color=(0.1, 0.1, 0.12, 1), # Dark slate text
+                    text_color=(0.98, 0.85, 0.85, 1) if is_dark else (0.1, 0.1, 0.12, 1),
                     markup=True,
                     size_hint_y=None
                 )
@@ -4861,14 +5060,14 @@ class PharmaGlobeApp(MDApp):
         price = med.get("price")
         shop_link = med.get("shop_link")
         if price or shop_link:
-            price_card = MDCard(
+            price_card = NonBlockingCard(
                 orientation='vertical',
                 size_hint_y=None,
                 padding=14,
                 spacing=10,
                 radius=[12, 12, 12, 12],
-                md_bg_color=(0.93, 0.96, 1.0, 0.5), # blue tint
-                line_color=(0.8, 0.9, 1.0, 1.0), # light blue border
+                md_bg_color=(0.1, 0.18, 0.25, 0.5) if is_dark else (0.93, 0.96, 1.0, 0.5), # blue tint
+                line_color=(0.15, 0.3, 0.45, 1.0) if is_dark else (0.8, 0.9, 1.0, 1.0), # light blue border
                 elevation=1
             )
             price_card.bind(minimum_height=price_card.setter('height'))
@@ -4878,7 +5077,7 @@ class PharmaGlobeApp(MDApp):
                     text=f"[b]Suggested Price:[/b]  {price}",
                     font_style="Subtitle2",
                     theme_text_color="Custom",
-                    text_color=(0.1, 0.1, 0.12, 1), # Dark slate text
+                    text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1),
                     markup=True,
                     size_hint_y=None,
                     height=24
@@ -4888,7 +5087,7 @@ class PharmaGlobeApp(MDApp):
             if shop_link:
                 btn = MDRaisedButton(
                     text="Find / Buy Online",
-                    md_bg_color=(1.0, 0.42, 0.36, 1.0), # Coral primary color
+                    md_bg_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0),
                     text_color=(1, 1, 1, 1),
                     size_hint_x=1,
                     on_release=lambda x: webbrowser.open(shop_link)
@@ -4903,14 +5102,14 @@ class PharmaGlobeApp(MDApp):
         home_c = getattr(self, "home_country", "USA")
         
         # Create a comparison card container
-        comp_card = MDCard(
+        comp_card = NonBlockingCard(
             orientation='vertical',
             size_hint_y=None,
             padding=14,
             spacing=12,
             radius=[12, 12, 12, 12],
-            md_bg_color=(1, 1, 1, 1), # Pure white comparison card
-            line_color=(0.9, 0.91, 0.94, 1), # Light gray border
+            md_bg_color=(0.13, 0.13, 0.15, 1) if is_dark else (1, 1, 1, 1),
+            line_color=(0.2, 0.2, 0.22, 1) if is_dark else (0.9, 0.91, 0.94, 1),
             elevation=1
         )
         comp_card.bind(minimum_height=comp_card.setter('height'))
@@ -4927,7 +5126,7 @@ class PharmaGlobeApp(MDApp):
         comp_icon = MDIcon(
             icon="scale-balance",
             theme_text_color="Custom",
-            text_color=(0.1, 0.45, 0.85, 1.0), # blue accent
+            text_color=(0.76, 0.12, 0.18, 1.0) if is_dark else (0.1, 0.45, 0.85, 1.0),
             font_size="20sp",
             size_hint=(None, None),
             size=(24, 24),
@@ -4938,7 +5137,7 @@ class PharmaGlobeApp(MDApp):
             text="COMPARE EQUIVALENTS",
             font_style="Subtitle2",
             theme_text_color="Custom",
-            text_color=(0.1, 0.45, 0.85, 1.0), # blue accent
+            text_color=(0.76, 0.12, 0.18, 1.0) if is_dark else (0.1, 0.45, 0.85, 1.0),
             bold=True,
             size_hint_y=None,
             height=32,
@@ -4962,7 +5161,7 @@ class PharmaGlobeApp(MDApp):
             text="Compare with country:",
             font_style="Caption",
             theme_text_color="Custom",
-            text_color=(0.4, 0.4, 0.45, 1),
+            text_color=(0.65, 0.65, 0.7, 1) if is_dark else (0.4, 0.4, 0.45, 1),
             size_hint_x=0.55,
             valign="middle"
         )
@@ -4970,7 +5169,7 @@ class PharmaGlobeApp(MDApp):
         dropdown_btn = MDRaisedButton(
             text=f"{home_c} ▾",
             text_color=(1, 1, 1, 1),
-            md_bg_color=(1.0, 0.42, 0.36, 1.0),
+            md_bg_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0),
             size_hint_x=0.45,
             pos_hint={"center_y": 0.5}
         )
@@ -5014,7 +5213,7 @@ class PharmaGlobeApp(MDApp):
                 text=f"Equivalents in [b]{home_c}[/b] for [i]{matched_cat}[/i]:",
                 font_style="Caption",
                 theme_text_color="Custom",
-                text_color=(0.4, 0.4, 0.45, 1),
+                text_color=(0.65, 0.65, 0.7, 1) if is_dark else (0.4, 0.4, 0.45, 1),
                 markup=True,
                 size_hint_y=None,
                 height=18
@@ -5022,15 +5221,15 @@ class PharmaGlobeApp(MDApp):
             comp_card.add_widget(intro_lbl)
             
             for eq in equivalents:
-                eq_item = MDCard(
+                eq_item = NonBlockingCard(
                     orientation='horizontal',
                     size_hint_y=None,
                     height=dp(50),
                     padding=[10, 6, 10, 6],
                     spacing=10,
                     radius=[8, 8, 8, 8],
-                    md_bg_color=(0.96, 0.97, 0.98, 1.0), # Light gray background
-                    line_color=(0.9, 0.91, 0.94, 1),
+                    md_bg_color=(0.18, 0.18, 0.2, 1.0) if is_dark else (0.96, 0.97, 0.98, 1.0),
+                    line_color=(0.25, 0.25, 0.28, 1) if is_dark else (0.9, 0.91, 0.94, 1),
                     ripple_behavior=True,
                     on_release=lambda x, m=eq: self.show_medication_details(m)
                 )
@@ -5045,13 +5244,13 @@ class PharmaGlobeApp(MDApp):
                     font_style="Subtitle2",
                     bold=True,
                     theme_text_color="Custom",
-                    text_color=(0.1, 0.1, 0.12, 1) # Dark slate
+                    text_color=(0.95, 0.95, 0.98, 1) if is_dark else (0.1, 0.1, 0.12, 1)
                 )
                 eq_generic = MDLabel(
                     text=eq.get("generic_name"),
                     font_style="Caption",
                     theme_text_color="Custom",
-                    text_color=(0.4, 0.4, 0.45, 1)
+                    text_color=(0.65, 0.65, 0.7, 1) if is_dark else (0.4, 0.4, 0.45, 1)
                 )
                 eq_info.add_widget(eq_name)
                 eq_info.add_widget(eq_generic)
@@ -5064,7 +5263,7 @@ class PharmaGlobeApp(MDApp):
                 chevron = MDIcon(
                     icon="chevron-right",
                     theme_text_color="Custom",
-                    text_color=(1.0, 0.42, 0.36, 1.0), # Coral chevron
+                    text_color=(0.85, 0.65, 0.13, 1.0) if is_dark else (1.0, 0.42, 0.36, 1.0),
                     font_size="24sp",
                     pos_hint={"center_y": 0.5}
                 )
@@ -5078,7 +5277,7 @@ class PharmaGlobeApp(MDApp):
                 text=f"No equivalent medicines found in [b]{home_c}[/b] for category [i]{matched_cat}[/i].",
                 font_style="Caption",
                 theme_text_color="Custom",
-                text_color=(0.4, 0.4, 0.45, 1),
+                text_color=(0.65, 0.65, 0.7, 1) if is_dark else (0.4, 0.4, 0.45, 1),
                 markup=True,
                 size_hint_y=None,
                 height=36
